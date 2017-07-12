@@ -43,6 +43,9 @@ router.post('/coffee', (req, res) => {
                 "icon": "coffee.png",
                 "click_action": "http://localhost:" + req.app.locals.port
             },
+			data: {
+				"name": req.body.name
+			}
         }).then((msgRes) => {
             console.log("Send message suc");
         }).catch((err) => {
