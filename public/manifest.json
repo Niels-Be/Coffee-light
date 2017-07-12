@@ -1,5 +1,34 @@
 {
     "//": "Some browsers will use this to enable push notifications.",
     "//": "It is the same for all projects, this is not your project's sender ID",
-    "gcm_sender_id": "103953800507"
+    "gcm_sender_id": "103953800507",
+	
+	"name": "Coffee Break",
+	"short_name": "Coffee",
+	"start_url": "./",
+	"scope": "./",
+	"display": "standalone",
+	"background_color": "#6F4E37",
+	"icons": [
+		{
+			"src": "icons/app_icon_48.png",
+			"sizes": "48x48"
+		},
+		{
+			"src": "icons/app_icon_72.png",
+			"sizes": "72x72"
+		},
+		{
+			"src": "icons/app_icon_96.png",
+			"sizes": "96x96"
+		},
+		{
+			"src": "icons/app_icon_144.png",
+			"sizes": "144x144"
+		},
+		{
+			"src": "icons/app_icon_192.png",
+			"sizes": "192x192"
+		}
+	]
 }
