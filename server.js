@@ -17,7 +17,7 @@ const routes = require('./app/routes');
 const app = express();
 
 // set our port
-const port = process.env.PORT || 8080;
+const port = app.locals.port = process.env.PORT || 8080;
 
 // middleware
 app.use(bodyParser.json());

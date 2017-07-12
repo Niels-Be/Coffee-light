@@ -1,9 +1,18 @@
 // Import and configure the Firebase SDK
 // These scripts are made available when the app is served or deployed on Firebase Hosting
 // If you do not serve/host your project using Firebase Hosting see https://firebase.google.com/docs/web/setup
-importScripts('/__/firebase/3.9.0/firebase-app.js');
-importScripts('/__/firebase/3.9.0/firebase-messaging.js');
-importScripts('/__/firebase/init.js');
+importScripts('https://www.gstatic.com/firebasejs/3.9.0/firebase-app.js');
+importScripts('https://www.gstatic.com/firebasejs/3.9.0/firebase-messaging.js');
+
+var config = {
+  apiKey: "AIzaSyD9lqJmbdm9l_QmhB4f1j_Kdu3fMYerGkA",
+  authDomain: "coffee-light.firebaseapp.com",
+  databaseURL: "https://coffee-light.firebaseio.com",
+  projectId: "coffee-light",
+  storageBucket: "coffee-light.appspot.com",
+  messagingSenderId: "252605375808"
+};
+firebase.initializeApp(config);
 
 const messaging = firebase.messaging();
 

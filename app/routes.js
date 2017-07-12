@@ -35,13 +35,13 @@ router.post('/coffee', (req, res) => {
     console.log("%s requests coffee", req.body.name);
     coffeeRequesters.add(req.body.name);
 
-    if(devices.size > 0) {
+    if (devices.size > 0) {
         req.firebase.messaging().sendToDevice([...devices], {
             notification: {
                 "title": "Coffee!!!!",
                 "body": req.body.name + " wants coffee",
                 "icon": "coffee.png",
-                "click_action": "http://localhost:8088"
+                "click_action": "http://localhost:" + req.app.locals.port
             },
         }).then((msgRes) => {
             console.log("Send message suc");
