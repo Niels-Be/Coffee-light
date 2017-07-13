@@ -79,6 +79,7 @@ function sendTokenToServer(currentToken) {
 	console.log('Sending token to server...');
 	// TODO(developer): Send the current token to your server.
 	fetch("/register", {
+		credentials: 'same-origin',
 		method: 'POST',
 		headers: new Headers({
 			"content-type": "application/json"

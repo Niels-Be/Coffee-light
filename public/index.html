@@ -57,6 +57,41 @@
 			});
 		};
 		
+		coffeeLight.renderGroups = () => {
+			coffeeLight.loadGroups().then(groups => {
+				var groupsContainer = document.getElementById("groupsContainer");
+				while(groupsContainer.childElementCount > 0) {groupsContainer.removeChild(groupsContainer.firstElementChild)};
+				groups.forEach( group => {
+					var div = document.createElement("div");
+					div.innerText = group.name;
+					groupsContainer.appendChild(div);
+				});
+			});
+		};
+		
+		coffeeLight.loadGroups = () => {
+			return fetch("./channels", {
+			  "credentials": 'same-origin',
+			  "method": "GET"
+			})
+			.then(response => response.json())
+			.then((data) => data.channels);
+		};
+		
+		coffeeLight.createGroup = () => {
+			var name = prompt("Group Name");
+			fetch("./channel", {
+			  "credentials": 'same-origin',
+			  "method": "PUT",
+			  "headers": {
+				"content-type": "application/json",
+			  },
+			  "body": JSON.stringify({
+				"name": name
+			  })
+			}).then(coffeeLight.renderGroups);
+		};
+		
 		coffeeLight.changeName = () => {
 			var name = prompt("Name");
 			document.getElementById("nameSpan").innerText = name;
@@ -99,19 +134,23 @@
 		}
 		
 		window.onload = () => {
-			document.getElementById("changeNameBtn").onclick = coffeeLight.changeName;
+			document.getElementById("changeNameBtn").onclick  = coffeeLight.changeName;
+			document.getElementById("createGroupBtn").onclick = coffeeLight.createGroup;
 			coffeeLight.button = document.getElementById("button");
 			coffeeLight.button.onclick = coffeeLight.buttonClick;
 			coffeeLight.handle = document.getElementById("handle");
 			coffeeLight.setStyle();
 			coffeeLight.loadName();
+			coffeeLight.renderGroups();
 		};
 		window.onresize = coffeeLight.setStyle;
 	</script>
 </head>
 
 <body style="font-family: Arial; background-color: black; color: white;">
-	<span>Hello <span id="nameSpan">Philipp</span>&nbsp;<button id="changeNameBtn">change name</button></span>
+	<span>Hello <span id="nameSpan">Philipp</span>&nbsp;<button id="changeNameBtn">change name</button></span><br>
+	<button id="createGroupBtn">Create Group</button>
+	<div id="groupsContainer" style="cursor: pointer"></div>
 	
     <button class="coffee" id="button" style="outline:none; position: absolute; top:0; left: 0; background: #6F4E37; color: white; border: solid; border-radius: 50%; width: 70%; height: 70%;">
 		I want coffee!
