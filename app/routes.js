@@ -49,7 +49,8 @@ router.get('/channels', (req, res) => {
             return {
                 id: c.id,
                 name: c.name,
-                hasPassword: !!c.password
+                hasPassword: !!c.password,
+                subscriptions: c.subscriptions
             };
         });
 
@@ -92,7 +93,7 @@ router.put('/channel', authenticated((req, res, next) => {
 
 }));
 
-router.post('/channel/subscribtion', authenticated((req, res, next) => {
+router.post('/channel/subscription', authenticated((req, res, next) => {
     let channel = coffeLight.getChannel(req.body.channelId);
     if (!channel) {
         return res.status(400).json({
@@ -111,7 +112,7 @@ router.post('/channel/subscribtion', authenticated((req, res, next) => {
     }).catch(next);
 }));
 
-router.delete('/channel/subscribtion', authenticated((req, res, next) => {
+router.delete('/channel/subscription', authenticated((req, res, next) => {
     let channel = coffeLight.getChannel(req.body.channelId);
     if (!channel) {
         return res.status(400).json({
@@ -120,7 +121,7 @@ router.delete('/channel/subscribtion', authenticated((req, res, next) => {
         });
     }
     req.user.unsubscribe(channel).then(() => {
-        if (channel.subscribtions <= 0) {
+        if (channel.subscriptions <= 0) {
             //Delete channel if it is empty
             coffeLight.channels = coffeLight.channels.filter(c => c.id != channel.id);
         }
@@ -137,7 +138,7 @@ router.post('/channel/notify', authenticated((req, res, next) => {
             error: "Channel not found"
         });
     }
-    if (!req.user.subscribtions.has(channel.id)) {
+    if (!req.user.subscriptions.has(channel.id)) {
         return res.status(400).json({
             code: 403,
             error: "Not member of that channel"
@@ -148,9 +149,9 @@ router.post('/channel/notify', authenticated((req, res, next) => {
     }).catch(next);
 }));
 
-router.get('/subscribtions', authenticated((req, res, next) => {
+router.get('/subscription', authenticated((req, res, next) => {
     res.json({
-        subscribtions: [...req.user.subscribtions]
+        subscriptions: [...req.user.subscriptions]
     });
 }));
 

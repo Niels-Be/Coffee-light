@@ -3,7 +3,7 @@ class User {
         this.id = id;
         this.name = options.name;
         this.tokens = new Set(options.tokens || []);
-        this.subscribtions = new Set(options.subscribtions || []);
+        this.subscriptions = new Set(options.subscriptions || []);
 
         if (options.token)
             this.addToken(options.token);
@@ -18,14 +18,14 @@ class User {
     }
 
     subscribe(channel) {
-        channel.subscribtions++;
-        this.subscribtions.add(channel.id);
+        channel.subscriptions++;
+        this.subscriptions.add(channel.id);
         coffeLight.emit("subscribeToChannel", this, channel);
     }
 
     unsubscribe(channel) {
-        channel.subscribtions--;
-        this.subscribtions.delete(channel.id);
+        channel.subscriptions--;
+        this.subscriptions.delete(channel.id);
         coffeLight.emit("unsubscribeFromChannel", this, channel);
     }
 

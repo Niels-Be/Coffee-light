@@ -10,7 +10,7 @@ class Channel {
         this.title = options.title || "Coffee!!!";
         this.icon = options.icon || "coffee.png";
 
-        this.subscribtions = 0;
+        this.subscriptions = 0;
     }
 
     send(payload, options) {
