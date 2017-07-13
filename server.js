@@ -25,7 +25,7 @@ app.use(session({
 }));
 
 // routes
-app.use('/', routes);
+app.use('/api/v1/', routes);
 
 app.use(express.static(__dirname + '/public'));
 

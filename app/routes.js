@@ -114,21 +114,27 @@ let channelIdCounter = 1;
 let users = [];
 let userIdCounter = 1;
 
-router.use((req, res, next) => {
-    if (req.session.userId) {
-        req.user = users.find(u => u.id == req.session.userId);
-        if (!req.user) {
-            //e.g. load from db or should not happen
-            console.log("User %d not found", req.session.userId);
+
+function authenticated(cb, noHandleError) {
+    return (req, res, next) => {
+        let type, token;
+        if (req.session.userId) {
+            req.user = users.find(u => u.id == req.session.userId);
+            if (!req.user) {
+                //e.g. load from db or should not happen
+                console.log("User %d not found", req.session.userId);
+            }
+            req.session.touch();
         }
-        req.session.touch();
-    }
-    next();
-});
+        if (!req.user && !noHandleError)
+            return res.sendStatus(401);
+        cb(req, res, next);
+    };
+}
 
 
 
-router.post('/register', (req, res) => {
+router.post('/register', authenticated((req, res) => {
     if (!req.user) {
         let id = userIdCounter++;
         req.user = new User(id, {});
@@ -141,7 +147,7 @@ router.post('/register', (req, res) => {
     if (req.body.token)
         req.user.addToken(req.body.token);
     res.end();
-});
+}, true));
 
 
 
@@ -162,7 +168,7 @@ router.get('/channels', (req, res) => {
     });
 });
 
-router.put('/channel', (req, res, next) => {
+router.put('/channel', authenticated((req, res, next) => {
     if (!req.body.name) {
         return res.status(400).json({
             code: 400,
@@ -179,9 +185,9 @@ router.put('/channel', (req, res, next) => {
         });
     }).catch(next);
 
-});
+}));
 
-router.post('/channel/subscribtion', (req, res, next) => {
+router.post('/channel/subscribtion', authenticated((req, res, next) => {
     let channel = channels.find(c => c.id == req.body.channelId);
     if (!channel) {
         return res.status(400).json({
@@ -198,9 +204,9 @@ router.post('/channel/subscribtion', (req, res, next) => {
     req.user.subscribe(channel).then(() => {
         res.end();
     }).catch(next);
-});
+}));
 
-router.delete('/channel/subscribtion', (req, res, next) => {
+router.delete('/channel/subscribtion', authenticated((req, res, next) => {
     let channel = channels.find(c => c.id == req.body.channelId);
     if (!channel) {
         return res.status(400).json({
@@ -215,10 +221,10 @@ router.delete('/channel/subscribtion', (req, res, next) => {
         }
         res.end();
     }).catch(next);
-});
+}));
 
 
-router.post('/channel/notify', (req, res, next) => {
+router.post('/channel/notify', authenticated((req, res, next) => {
     let channel = channels.find(c => c.id == req.body.channelId);
     if (!channel) {
         return res.status(400).json({
@@ -235,13 +241,13 @@ router.post('/channel/notify', (req, res, next) => {
     channel.notify(req.user).then(() => {
         req.end();
     }).catch(next);
-});
+}));
 
-router.get('/subscribtions', (req, res, next) => {
+router.get('/subscribtions', authenticated((req, res, next) => {
     res.json({
         subscribtions: [...req.user.subscribtions]
     });
-});
+}));
 
 
 router.use((err, req, res, next) => {
