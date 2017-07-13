@@ -70,6 +70,12 @@ function init() {
 // - send messages back to this app
 // - subscribe/unsubscribe the token from topics
 function sendTokenToServer(currentToken) {
+	
+	var name = coffeeLight.loadName();
+	if(!name) {
+		return;
+	}
+	
 	console.log('Sending token to server...');
 	// TODO(developer): Send the current token to your server.
 	fetch("/register", {
@@ -78,7 +84,8 @@ function sendTokenToServer(currentToken) {
 			"content-type": "application/json"
 		}),
 		body: JSON.stringify({
-			token: currentToken
+			token: currentToken,
+			name: name
 		})
 	});
 }

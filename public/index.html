@@ -61,6 +61,7 @@
 			var name = prompt("Name");
 			document.getElementById("nameSpan").innerText = name;
 			localStorage.setItem("coffeeLight.name", name);
+			init();
 		};
 		
 		coffeeLight.loadName = () => {
