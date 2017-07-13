@@ -43,9 +43,10 @@ router.post('/coffee', (req, res) => {
                 "icon": "coffee.png",
                 "click_action": "http://localhost:" + req.app.locals.port
             },
-			data: {
-				"name": req.body.name
-			}
+            data: {
+                "name": req.body.name
+            },
+            time_to_live: 60
         }).then((msgRes) => {
             console.log("Send message suc");
         }).catch((err) => {
