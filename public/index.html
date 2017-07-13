@@ -5,9 +5,39 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	
 	<link rel="manifest" href="/manifest.json">
-	
+
 	<script src="https://www.gstatic.com/firebasejs/4.1.3/firebase-app.js"></script>
 	<script src="https://www.gstatic.com/firebasejs/4.1.3/firebase-messaging.js"></script>
+	
+	<style>
+		button.coffee {
+			display: inline-block;
+			text-align: center;
+			cursor: pointer;
+			overflow: hidden;
+			transition: background-color 0.3s linear;
+		}
+		button.coffee:after {
+			content: "";
+			display: block;
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			top: 0;
+			left: 0;
+			pointer-events: none;
+			background-image: radial-gradient(circle, black 20%, rgba(0, 0, 0, 0) 19%);
+			transform: scale(5);
+			opacity: 0;
+			transition: transform 1.5s, opacity 1s;
+		}
+		button.coffee:active:after {
+			transform: scale(0);
+			opacity: .2;
+			transition: 0s;
+		}
+	</style>
+	
 	<script>
 		"use strict";
 		var coffeeLight = coffeeLight || {};
@@ -71,7 +101,8 @@
 
 <body style="font-family: Arial; background-color: black; color: white;">
 	<span>Hello <span id="nameSpan">Philipp</span>&nbsp;<button id="changeNameBtn">change name</button></span>
-    <button id="button" style="position: absolute; top:0; left: 0; background: #6F4E37; color: white; border: solid; border-radius: 50%; width: 70%; height: 70%;">
+	
+    <button class="coffee" id="button" style="outline:none; position: absolute; top:0; left: 0; background: #6F4E37; color: white; border: solid; border-radius: 50%; width: 70%; height: 70%;">
 		I want coffee!
 	</button>
 	<div id="handle" style="position: absolute; background-color: white; border-radius: 50% 0% 0% 50%">
