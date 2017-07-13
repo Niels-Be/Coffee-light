@@ -58,5 +58,8 @@ typings/
 .env
 
 
-
+# custom files
+.firebaserc
+db.json
+config.json
 serviceAccountKey.json
