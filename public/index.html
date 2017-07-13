@@ -79,12 +79,22 @@
 			coffeeLight.button.style.margin = ((window.innerHeight - diameter)/2 + "px") + " " + ((window.innerWidth - diameter)/2 + "px");
 			
 			var handleHeight = 0.05 * diameter;
-			var handleWidth  = 0.15  * diameter;
-			coffeeLight.handle.style.height = handleHeight + "px";
-			coffeeLight.handle.style.width  = handleWidth  + "px";
+			var handleWidth  = 0.25 * diameter;
 			
-			coffeeLight.handle.style.top  = (window.innerHeight - handleHeight)/2 + "px";
-			coffeeLight.handle.style.left = (window.innerWidth - diameter)/2 - 0.95 * handleWidth + "px";
+			if(window.innerWidth > window.innerHeight) {
+				coffeeLight.handle.style.height = handleHeight + "px";
+				coffeeLight.handle.style.width  = handleWidth  + "px";
+				coffeeLight.handle.style.top  = (window.innerHeight - handleHeight)/2 + "px";
+				coffeeLight.handle.style.left = (window.innerWidth - diameter)/2 - 0.95 * handleWidth + "px";
+				coffeeLight.handle.style.borderRadius = "50% 0% 0% 50%";
+			}
+			else {
+				coffeeLight.handle.style.width  = handleHeight + "px";
+				coffeeLight.handle.style.height = handleWidth  + "px";
+				coffeeLight.handle.style.left = (window.innerWidth  - handleHeight)/2 + "px";
+				coffeeLight.handle.style.top  = (window.innerHeight + diameter)/2 + "px";
+				coffeeLight.handle.style.borderRadius = "0% 0% 50% 50%";
+			}
 		}
 		
 		window.onload = () => {
