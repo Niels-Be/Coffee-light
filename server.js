@@ -3,16 +3,6 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 
 
-var firebase = require("firebase-admin");
-
-var serviceAccount = require("./serviceAccountKey.json");
-
-firebase.initializeApp({
-    credential: firebase.credential.cert(serviceAccount),
-    databaseURL: "https://coffee-light.firebaseio.com"
-});
-
-
 const routes = require('./app/routes');
 
 const app = express();
@@ -33,11 +23,6 @@ app.use(session({
         //secure: true
     }
 }));
-
-app.use((req, res, next) => {
-    req.firebase = firebase;
-    next();
-});
 
 // routes
 app.use('/', routes);

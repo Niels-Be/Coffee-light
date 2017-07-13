@@ -1,15 +1,19 @@
 const express = require('express');
-const router = express.Router();
+const firebase = require("firebase-admin");
+const serviceAccount = require("../serviceAccountKey.json");
 
-//Routes go here
-
-module.exports = router;
-
-let messaging = null;
+firebase.initializeApp({
+    credential: firebase.credential.cert(serviceAccount),
+    databaseURL: "https://coffee-light.firebaseio.com"
+});
+let messaging = firebase.messaging();
 
 let config = {
     externalUrl: "http://localhost:8080"
 };
+
+const router = express.Router();
+
 
 class Channel {
 
@@ -134,7 +138,8 @@ router.post('/register', (req, res) => {
     }
     if (req.body.name)
         req.user.name = req.body.name;
-    req.user.addToken(req.body.token);
+    if (req.body.token)
+        req.user.addToken(req.body.token);
     res.end();
 });
 
@@ -240,3 +245,6 @@ router.use((err, req, res, next) => {
         error: err
     });
 });
+
+
+module.exports = router;
