@@ -45,7 +45,7 @@
 		coffeeLight.size = 0.7;
 		
 		coffeeLight.buttonClick = () => {
-			fetch("./coffee", {
+			fetch("./api/v1/coffee", {
 			  "method": "POST",
 			  "headers": {
 				"content-type": "application/json",
@@ -70,7 +70,7 @@
 		};
 		
 		coffeeLight.loadGroups = () => {
-			return fetch("./channels", {
+			return fetch("./api/v1/channels", {
 			  "credentials": 'same-origin',
 			  "method": "GET"
 			})
@@ -80,7 +80,7 @@
 		
 		coffeeLight.createGroup = () => {
 			var name = prompt("Group Name");
-			fetch("./channel", {
+			fetch("./api/v1/channel", {
 			  "credentials": 'same-origin',
 			  "method": "PUT",
 			  "headers": {
