@@ -237,6 +237,12 @@ router.post('/channel/notify', (req, res, next) => {
     }).catch(next);
 });
 
+router.get('/subscribtions', (req, res, next) => {
+    res.json({
+        subscribtions: [...req.user.subscribtions]
+    });
+});
+
 
 router.use((err, req, res, next) => {
     console.log(err.stack);
