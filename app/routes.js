@@ -82,7 +82,7 @@ class User {
 
     subscribe(channel) {
         if (this.tokens.length === 0) return Promise.reject("NO_TOKENS");
-        return messaging.subscribeToTopic([...this.tokens], channel.id)
+        return messaging.subscribeToTopic([...this.tokens], "/topics/" + channel.id)
             .then((res) => {
                 console.log("Subscribe suc: ", res);
                 channel.subscribtions++;
@@ -91,7 +91,7 @@ class User {
     }
 
     unsubscribe(channel) {
-        return messaging.unsubscribeFromTopic([...this.tokens], channel.id)
+        return messaging.unsubscribeFromTopic([...this.tokens], "/topics/" + channel.id)
             .then((res) => {
                 console.log("Unsubscribe suc: ", res);
                 channel.subscribtions--;
@@ -162,7 +162,7 @@ router.get('/channels', (req, res) => {
     });
 });
 
-router.put('/channel', (req, res) => {
+router.put('/channel', (req, res, next) => {
     if (!req.body.name) {
         return res.status(400).json({
             code: 400,
@@ -200,7 +200,7 @@ router.post('/channel/subscribtion', (req, res, next) => {
     }).catch(next);
 });
 
-router.delete('/channel/subscribtion', (req, res) => {
+router.delete('/channel/subscribtion', (req, res, next) => {
     let channel = channels.find(c => c.id == req.body.channelId);
     if (!channel) {
         return res.status(400).json({
