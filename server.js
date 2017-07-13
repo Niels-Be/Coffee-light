@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const session = require('express-session');
 
 
 var firebase = require("firebase-admin");
@@ -23,6 +24,14 @@ const port = app.locals.port = process.env.PORT || 8080;
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
     extended: false
+}));
+app.use(session({
+    secret: 'agv45983r80N§/TsadH(§"Eicon3crb',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        //secure: true
+    }
 }));
 
 app.use((req, res, next) => {
