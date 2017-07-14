@@ -79,8 +79,13 @@ function shutdownHandler() {
     }, 10000);
 
     server.close(() => {
+        console.log("Server closed");
         clearTimeout(timeout);
-        coffeLight.close();
+        coffeLight.close().then(() => {
+            //console.log(process._getActiveHandles().filter(h=>h._type!=='tty'));
+            //console.log(process._getActiveRequests());
+            //process.exit(0);
+        });
     });
 }
 process.on('SIGTERM', shutdownHandler);

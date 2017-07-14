@@ -2,12 +2,12 @@ const firebase = require("firebase-admin");
 
 const serviceAccount = require("../serviceAccountKey.json");
 
-firebase.initializeApp({
+let adminApp = firebase.initializeApp({
     credential: firebase.credential.cert(serviceAccount),
     databaseURL: "https://coffee-light.firebaseio.com"
 });
 
-let messaging = firebase.messaging();
+let messaging = adminApp.messaging();
 
 
 
@@ -94,4 +94,8 @@ coffeLight.on("unsubscribeFromChannel", (user, channel) => {
         .catch((err) => {
             console.error(err);
         });
+});
+
+coffeLight.on("close", () => {
+    adminApp.delete();
 });

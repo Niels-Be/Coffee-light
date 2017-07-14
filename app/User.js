@@ -10,7 +10,12 @@ class User {
     }
 
     addToken(token) {
-        this.tokens.add(token);
+        if (!this.tokens.has(token)) {
+            this.tokens.add(token);
+            this.subscriptions
+                .map(s => coffeLight.getChannel(s))
+                .forEach(c => coffeLight.emit("subscribeToChannel", this, c));
+        }
     }
 
     revokeToken(token) {

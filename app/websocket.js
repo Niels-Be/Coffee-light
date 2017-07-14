@@ -69,3 +69,7 @@ coffeLight.on("sendToChannel", (channel, payload, options) => {
         ws.send(payload);
     });
 });
+
+coffeLight.on("close", () => {
+    //TODO close all websockets
+});

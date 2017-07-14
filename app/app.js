@@ -88,6 +88,7 @@ class CoffeLight extends EventEmitter {
         return new Promise((resolve, reject) => {
             fs.writeFile(this.config.storageDb, JSON.stringify(obj), (err) => {
                 if (err) return reject(err);
+                console.log("App Saved");
                 resolve();
             });
         });
@@ -102,8 +103,18 @@ class CoffeLight extends EventEmitter {
                 if (err) return reject(err);
 
                 let obj = JSON.parse(data);
-                obj.users = obj.users.map(u => new User(u.id, u));
                 obj.channels = obj.channels.map(c => new Channel(c.id, c));
+                obj.users = obj.users.map((u) => {
+                    //remove unkowen subscriotions
+                    let channels = u.subscriptions
+                        .map(s => obj.channels.find(c => c.id === s))
+                        .filter(c => !!c);
+                    u.subscriptions = channels.map(c => c.id);
+
+                    let user = new User(u.id, u);
+                    channels.forEach(c => this.emit("subscribeToChannel", user, c));
+                    return user;
+                });
 
                 Object.assign(this, obj);
                 resolve();
@@ -112,6 +123,7 @@ class CoffeLight extends EventEmitter {
     }
 
     close() {
+        this.emit("close");
         return this.save().catch((err) => console.error(err.stack));
     }
 
