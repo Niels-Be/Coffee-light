@@ -293,3 +293,12 @@ function getSubscriptions() {
             return res.json();
         });
 }
+
+function getSubscripedChannels() {
+	return Promise.all([getSubscriptions(), getChannels()])
+	.then((res) => {
+		const channels = res[1].channels;
+		const subscriptions = res[0].subscriptions;
+		return channels.filter( (c) => subscriptions.indexOf(c.id) >= 0 );
+	});
+}

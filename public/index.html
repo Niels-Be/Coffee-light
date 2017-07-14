@@ -11,6 +11,7 @@
 	<link rel="manifest" href="/manifest.json">
 	<script src="./resize-observer-polyfill.js"></script>
 	<script src="https://www.gstatic.com/firebasejs/4.1.3/firebase-app.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/4.1.3/firebase-auth.js"></script>
 	<script src="https://www.gstatic.com/firebasejs/4.1.3/firebase-messaging.js"></script>
 	<script type="text/javascript">
 	
@@ -37,7 +38,7 @@
 		
 		coffeeLight.changeName = (name) => {
 			localStorage.setItem("coffeeLight.name", name);
-			init();
+			changeName(name);
 		};
 		
 		coffeeLight.loadGroups = () => {
@@ -113,9 +114,16 @@
 				$scope.name = coffeeLight.loadName();
 				
 				$scope.groups = [{"name" : "Loading..."}];
-				coffeeLight.loadGroups().then((groups) => {
-					$scope.$apply(() => {$scope.groups = groups;}); 
-				});
+				function updateGroupsBinding() {
+					getSubscripedChannels().then((groups) => {
+						$scope.$apply(() => {$scope.groups = groups;}); 
+					});
+				}
+				updateGroupsBinding();
+
+				$scope.leaveGroup = function(groupid) {
+					unsubscribeFromChannel(groupid).then(updateGroupsBinding); 
+				}
 				
 				$scope.showSetName = function(ev) {
 					var confirm = $mdDialog.prompt()
@@ -146,7 +154,7 @@
 					  .cancel('Cancle');
 
 					$mdDialog.show(confirm).then(function(result) {
-						coffeeLight.createGroup(result);
+						coffeeLight.createGroup(result).then(updateGroupsBinding)
 					}, function() {
 					  // ignore
 					});
@@ -261,6 +269,9 @@
 					   <md-list>
 						  <md-list-item ng-click="showJoinGroup($event)" ng-repeat="group in groups" role="link">
 							<p>{{group.name}}</p>
+							  <md-button ng-click="leaveGroup(group.id)" class="md-icon-button md-secondary">
+								<md-icon md-svg-icon="navigation:ic_cancel_24px""></md-icon>
+							  </md-button>
 						  </md-list-item>
 						  
 					  </md-list>
