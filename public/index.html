@@ -113,6 +113,12 @@
 				
 				$scope.name = coffeeLight.loadName();
 				
+				$scope.joinGroup = group => {
+					subscribeToChannel(group.id)
+					.then($scope.hideDialog)
+					.then(updateGroupsBinding);
+				};
+				
 				$scope.groups = [{"name" : "Loading..."}];
 				function updateGroupsBinding() {
 					getSubscripedChannels().then((groups) => {
@@ -160,15 +166,23 @@
 					});
 				};
 				
-				  
-				   $scope.showJoinGroup = function (ev) {
-					$mdDialog.show({
-					  clickOutsideToClose: true,
-					  contentElement     : '#myStaticDialog',
-					  parent             : angular.element(document.body),
-					  targetEvent        : ev
-					});
-				  };
+				$scope.searchGroups = query => {
+					return searchChannels(query).then(r => r.channels);
+				};
+				
+				function showDialogFactory(id) {
+					return ev => {
+						console.log("opening dialog " + id);
+						$mdDialog.show({
+							clickOutsideToClose: true,
+							contentElement     : "#" + id,
+							parent             : angular.element(document.body),
+							targetEvent        : ev
+						});
+					};
+				}
+				
+				$scope.showJoinGroup = showDialogFactory("dialogJoin");
 
 				  function DialogController($scope, $mdDialog) {
 					$scope.hide   = function () {
@@ -180,8 +194,7 @@
 					};
 				  }
 				 
-				$scope.hideJoinDialog = function() {
-					console.log("close");
+				$scope.hideDialog = function() {
 					$mdDialog.hide();
 				};
 
@@ -309,7 +322,32 @@
 				<p>ABC</p>
 				<p>DEF</p>
 				<div layout-align="center" layout="row">
-				  <md-button aria-label="Close" class="md-raised md-primary" ng-click="hideJoinDialog()">Close</md-button>
+				  <md-button aria-label="Close" class="md-raised md-primary" ng-click="hideDialog()">Close</md-button>
+				</div>
+			  </md-dialog>
+			</div>
+			
+			<div class="md-dialog-container" id="dialogJoin">
+			  <md-dialog layout-padding="">
+				<h2>Join Group</h2>
+				<!-- Theming should be fixed in angular material 1.2.0 (Due by September 22, 2017) -->
+				<md-autocomplete class="md-accent" md-no-cache="false"
+					md-selected-item="joinGroupSelected"
+					md-search-text="searchText"
+					md-items="item in searchGroups(searchText)"
+					md-item-text="item.name"
+					md-min-length="0"
+					placeholder="Name">
+					<md-item-template>
+					  <span md-highlight-text="searchText" md-highlight-flags="^i">{{item.name}}</span>
+					</md-item-template>
+					<md-not-found>
+					  No groups matching "{{searchText}}" were found.
+					</md-not-found>
+				</md-autocomplete>
+				<div layout-align="center" layout="row">
+				  <md-button aria-label="Cancle" class="md-raised md-primary" ng-click="hideDialog()">Cancle</md-button>
+				  <md-button aria-label="Create" class="md-raised md-primary" ng-click="joinGroup(joinGroupSelected)">Join</md-button>
 				</div>
 			  </md-dialog>
 			</div>
