@@ -134,3 +134,159 @@ auth.onAuthStateChanged(function (user) {
         console.log("Signed out");
     }
 });
+
+
+
+function changeName(name) {
+    let authUpdate = auth.updateData({
+        displayName: name
+    });
+
+    let serverUpdate = fetch("./api/v1/register", {
+        credentials: 'same-origin',
+        method: 'POST',
+        headers: new Headers({
+            "content-type": "application/json",
+            "cache-control": "no-cache"
+        }),
+        body: JSON.stringify({
+            name: user.displayName
+        })
+    });
+
+    return Promise.all([authUpdate, serverUpdate]);
+}
+
+
+
+////// API //////
+var API_PREFIX = './api/v1';
+
+function getChannels() {
+    return searchChannels("");
+}
+
+function searchChannels(searchString) {
+    return fetch(API_PREFIX + '/channels?search=' + searchString, {
+            "credentials": 'same-origin'
+        })
+        .then((res) => {
+            if (res.status != 200)
+                return Promise.reject(res);
+            return res.json();
+        });
+}
+
+var channelCache = [];
+
+function getChannel(channelId, noCache) {
+    let channel = noCache ? null : channelCache.find(c => c.id === channelId);
+    if (channel)
+        return Promise.resolve(channel);
+    return fetch(API_PREFIX + '/channel?channelId=' + channelId, {
+            "credentials": 'same-origin'
+        })
+        .then((res) => {
+            if (res.status != 200)
+                return Promise.reject(res);
+            return res.json();
+        });
+}
+
+function createChannel(options) {
+    return fetch(API_PREFIX + '/channel', {
+        "credentials": 'same-origin',
+        "method": "PUT",
+        "headers": {
+            "content-type": "application/json",
+            "cache-control": "no-cache"
+        },
+        "body": JSON.stringify(options)
+    }).then((res) => {
+        if (res.status != 200)
+            return Promise.reject(res);
+        return res.json();
+    });
+}
+
+function updateChannel(channelId, options) {
+    let body = Object.assign({
+        channelId
+    }, options);
+    return fetch(API_PREFIX + '/channel', {
+        "credentials": 'same-origin',
+        "method": "POST",
+        "headers": {
+            "content-type": "application/json",
+            "cache-control": "no-cache"
+        },
+        "body": JSON.stringify(body)
+    }).then((res) => {
+        if (res.status != 200)
+            return Promise.reject(res);
+        return res.json();
+    });
+}
+
+function subscribeToChannel(channelId, password) {
+    return fetch(API_PREFIX + '/channel/subscription', {
+        "credentials": 'same-origin',
+        "method": "POST",
+        "headers": {
+            "content-type": "application/json",
+            "cache-control": "no-cache"
+        },
+        "body": JSON.stringify({
+            "channelId": channelId,
+            "password": password
+        })
+    }).then((res) => {
+        if (res.status != 200)
+            return Promise.reject(res);
+    });
+}
+
+function unsubscribeFromChannel(channelId) {
+    return fetch(API_PREFIX + '/channel/subscription', {
+        "credentials": 'same-origin',
+        "method": "DELETE",
+        "headers": {
+            "content-type": "application/json",
+            "cache-control": "no-cache"
+        },
+        "body": JSON.stringify({
+            "channelId": channelId
+        })
+    }).then((res) => {
+        if (res.status != 200)
+            return Promise.reject(res);
+    });
+}
+
+function sendNotification(channelId) {
+    return fetch(API_PREFIX + '/channel/notify', {
+        "credentials": 'same-origin',
+        "method": "DELETE",
+        "headers": {
+            "content-type": "application/json",
+            "cache-control": "no-cache"
+        },
+        "body": JSON.stringify({
+            "channelId": channelId
+        })
+    }).then((res) => {
+        if (res.status != 200)
+            return Promise.reject(res);
+    });
+}
+
+function getSubscriptions() {
+    return fetch(API_PREFIX + '/subscriptions', {
+            "credentials": 'same-origin'
+        })
+        .then((res) => {
+            if (res.status != 200)
+                return Promise.reject(res);
+            return res.json();
+        });
+}
