@@ -16,9 +16,20 @@ coffeLight.on("sendToUser", (user, payload, options) => {
         console.error("User has no vaild messaging token");
         return;
     }
-    messaging.sendToDevice([...user.tokens], payload, options)
+    let tokens = [...user.tokens];
+    messaging.sendToDevice(tokens, payload, options)
         .then((res) => {
-            console.log("Firebase sendToDevice: ", res);
+            console.log("Firebase sendToDevice: ", res.successCount);
+            if (res.failureCount > 0) {
+                res.errors.forEach((err) => {
+                    if (err.error.code === "messaging/registration-token-not-registered") {
+                        console.log("Delete invalid token");
+                        user.tokens.delete(tokens[err.index]);
+                    } else {
+                        console.error(err);
+                    }
+                });
+            }
         })
         .catch((err) => {
             console.error(err);
@@ -40,9 +51,20 @@ coffeLight.on("subscribeToChannel", (user, channel) => {
         console.error("User has no vaild messaging token");
         return;
     }
-    messaging.subscribeToTopic([...user.tokens], "/topics/" + channel.id)
+    let tokens = [...user.tokens];
+    messaging.subscribeToTopic(tokens, "/topics/" + channel.id)
         .then((res) => {
-            console.log("Firebase subscribe: ", res);
+            console.log("Firebase subscribe: ", res.successCount);
+            if (res.failureCount > 0) {
+                res.errors.forEach((err) => {
+                    if (err.error.code === "messaging/registration-token-not-registered") {
+                        console.log("Delete invalid token");
+                        user.tokens.delete(tokens[err.index]);
+                    } else {
+                        console.error(err);
+                    }
+                });
+            }
         })
         .catch((err) => {
             console.error(err);
@@ -54,9 +76,20 @@ coffeLight.on("unsubscribeFromChannel", (user, channel) => {
         console.error("User has no vaild messaging token");
         return;
     }
-    messaging.unsubscribeFromTopic([...user.tokens], "/topics/" + channel.id)
+    let tokens = [...user.tokens];
+    messaging.unsubscribeFromTopic(tokens, "/topics/" + channel.id)
         .then((res) => {
-            console.log("Firebase unsubscribe: ", res);
+            console.log("Firebase unsubscribe: ", res.successCount);
+            if (res.failureCount > 0) {
+                res.errors.forEach((err) => {
+                    if (err.error.code === "messaging/registration-token-not-registered") {
+                        console.log("Delete invalid token");
+                        user.tokens.delete(tokens[err.index]);
+                    } else {
+                        console.error(err);
+                    }
+                });
+            }
         })
         .catch((err) => {
             console.error(err);
