@@ -116,6 +116,18 @@ function loginOnServer(user) {
 
 
 auth.signInAnonymously().catch(console.error);
+const signIn = {};
+signIn.promise = new Promise(function(resolve, reject){
+	signIn.resolve = resolve;
+	signIn.reject = reject;
+});
+
+function signedInFetch() {
+	const args = arguments;
+	return signIn.promise.then(() => {
+		return fetch.apply(undefined, args);
+	});
+}
 
 auth.onAuthStateChanged(function (user) {
     if (user) {
@@ -131,7 +143,7 @@ auth.onAuthStateChanged(function (user) {
 
         loginOnServer(user).catch((err) => {
             console.log("Unable to login on server", err);
-        });
+        }).then(signIn.resolve);
     } else {
         // User is signed out.
 
@@ -140,13 +152,12 @@ auth.onAuthStateChanged(function (user) {
 });
 
 
-
 function changeName(name) {
     let authUpdate = auth.currentUser.updateProfile({
         displayName: name
     });
 
-    let serverUpdate = fetch("./api/v1/register", {
+    let serverUpdate = signedInFetch("./api/v1/register", {
         credentials: 'same-origin',
         method: 'POST',
         headers: new Headers({
@@ -171,7 +182,7 @@ function getChannels() {
 }
 
 function searchChannels(searchString) {
-    return fetch(API_PREFIX + '/channels?search=' + searchString, {
+    return signedInFetch(API_PREFIX + '/channels?search=' + searchString, {
             "credentials": 'same-origin'
         })
         .then((res) => {
@@ -187,7 +198,7 @@ function getChannel(channelId, noCache) {
     let channel = noCache ? null : channelCache.find(c => c.id === channelId);
     if (channel)
         return Promise.resolve(channel);
-    return fetch(API_PREFIX + '/channel?channelId=' + channelId, {
+    return signedInFetch(API_PREFIX + '/channel?channelId=' + channelId, {
             "credentials": 'same-origin'
         })
         .then((res) => {
@@ -198,7 +209,7 @@ function getChannel(channelId, noCache) {
 }
 
 function createChannel(options) {
-    return fetch(API_PREFIX + '/channel', {
+    return signedInFetch(API_PREFIX + '/channel', {
         "credentials": 'same-origin',
         "method": "PUT",
         "headers": {
@@ -217,7 +228,7 @@ function updateChannel(channelId, options) {
     let body = Object.assign({
         channelId
     }, options);
-    return fetch(API_PREFIX + '/channel', {
+    return signedInFetch(API_PREFIX + '/channel', {
         "credentials": 'same-origin',
         "method": "POST",
         "headers": {
@@ -233,7 +244,7 @@ function updateChannel(channelId, options) {
 }
 
 function subscribeToChannel(channelId, password) {
-    return fetch(API_PREFIX + '/channel/subscription', {
+    return signedInFetch(API_PREFIX + '/channel/subscription', {
         "credentials": 'same-origin',
         "method": "POST",
         "headers": {
@@ -251,7 +262,7 @@ function subscribeToChannel(channelId, password) {
 }
 
 function unsubscribeFromChannel(channelId) {
-    return fetch(API_PREFIX + '/channel/subscription', {
+    return signedInFetch(API_PREFIX + '/channel/subscription', {
         "credentials": 'same-origin',
         "method": "DELETE",
         "headers": {
@@ -268,7 +279,7 @@ function unsubscribeFromChannel(channelId) {
 }
 
 function sendNotification(channelId) {
-    return fetch(API_PREFIX + '/channel/notify', {
+    return signedInFetch(API_PREFIX + '/channel/notify', {
         "credentials": 'same-origin',
         "method": "POST",
         "headers": {
@@ -285,7 +296,7 @@ function sendNotification(channelId) {
 }
 
 function getSubscriptions() {
-    return fetch(API_PREFIX + '/subscriptions', {
+    return signedInFetch(API_PREFIX + '/subscriptions', {
             "credentials": 'same-origin'
         })
         .then((res) => {
