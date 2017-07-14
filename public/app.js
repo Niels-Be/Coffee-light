@@ -99,9 +99,9 @@ function deleteToken() {
 
 function loginOnServer(user) {
     return getToken().then((token) => {
-		if(user.displayName == null) {
-			return changeName("Coffee Lover");
-		}
+        if (user.displayName == null) {
+            return changeName("Coffee Lover");
+        }
         return fetch("./api/v1/register", {
             credentials: 'same-origin',
             method: 'POST',
@@ -153,7 +153,7 @@ function changeName(name) {
             "cache-control": "no-cache"
         }),
         body: JSON.stringify({
-            name: user.displayName
+            name: name
         })
     });
 
@@ -295,10 +295,10 @@ function getSubscriptions() {
 }
 
 function getSubscripedChannels() {
-	return Promise.all([getSubscriptions(), getChannels()])
-	.then((res) => {
-		const channels = res[1].channels;
-		const subscriptions = res[0].subscriptions;
-		return channels.filter( (c) => subscriptions.indexOf(c.id) >= 0 );
-	});
+    return Promise.all([getSubscriptions(), getChannels()])
+        .then((res) => {
+            const channels = res[1].channels;
+            const subscriptions = res[0].subscriptions;
+            return channels.filter((c) => subscriptions.indexOf(c.id) >= 0);
+        });
 }
