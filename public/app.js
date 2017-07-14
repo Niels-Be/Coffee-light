@@ -99,6 +99,9 @@ function deleteToken() {
 
 function loginOnServer(user) {
     return getToken().then((token) => {
+		if(user.displayName == null) {
+			return changeName("Coffee Lover");
+		}
         return fetch("./api/v1/register", {
             credentials: 'same-origin',
             method: 'POST',
@@ -138,7 +141,7 @@ auth.onAuthStateChanged(function (user) {
 
 
 function changeName(name) {
-    let authUpdate = auth.updateData({
+    let authUpdate = auth.currentUser.updateProfile({
         displayName: name
     });
 
