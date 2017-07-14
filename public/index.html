@@ -155,7 +155,7 @@
 					  .title("What's your name?")
 					  .placeholder('Name')
 					  .ariaLabel('Name')
-					  .initialValue('Coffee Lover')
+					  .initialValue(auth.currentUser ? auth.currentUser.displayName : 'Coffee Lover')
 					  .targetEvent(ev)
 					  .ok('Save')
 					  .cancel('Cancle');
