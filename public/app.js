@@ -269,7 +269,7 @@ function unsubscribeFromChannel(channelId) {
 function sendNotification(channelId) {
     return fetch(API_PREFIX + '/channel/notify', {
         "credentials": 'same-origin',
-        "method": "DELETE",
+        "method": "POST",
         "headers": {
             "content-type": "application/json",
             "cache-control": "no-cache"
