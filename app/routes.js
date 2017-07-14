@@ -148,8 +148,9 @@ router.delete('/channel/subscription', authenticated((req, res, next) => {
         });
     }
     req.user.unsubscribe(channel);
+    //Delete channel if it is empty
     if (channel.subscriptions <= 0) {
-        //Delete channel if it is empty
+        console.log("Delete empty channel[%s] %s", channel.id, channel.name);
         coffeLight.channels = coffeLight.channels.filter(c => c.id != channel.id);
     }
     res.end();
