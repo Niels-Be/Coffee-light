@@ -9,132 +9,128 @@ var config = {
 };
 firebase.initializeApp(config);
 
-// [START get_messaging_object]
-// Retrieve Firebase Messaging object.
+
 const messaging = firebase.messaging();
-// [END get_messaging_object]
-// IDs of divs that display Instance ID token UI or request permission UI.
-const tokenDivId = 'token_div';
-const permissionDivId = 'permission_div';
-// [START refresh_token]
-// Callback fired if Instance ID token is updated.
-messaging.onTokenRefresh(function() {
+const auth = firebase.auth();
+
+
+messaging.onTokenRefresh(function () {
     messaging.getToken()
-        .then(function(refreshedToken) {
+        .then(function (refreshedToken) {
             console.log('Token refreshed.');
             // Send Instance ID token to app server.
-            sendTokenToServer(refreshedToken);
-            // [START_EXCLUDE]
-            // Display new Instance ID token and clear UI of all previous messages.
-            init();
-            // [END_EXCLUDE]
+            return fetch("./api/v1/register", {
+                credentials: 'same-origin',
+                method: 'POST',
+                headers: new Headers({
+                    "content-type": "application/json"
+                }),
+                body: JSON.stringify({
+                    token: currentToken
+                })
+            });
         })
-        .catch(function(err) {
+        .catch(function (err) {
             console.log('Unable to retrieve refreshed token ', err);
         });
 });
-// [END refresh_token]
-// [START receive_message]
+
 // Handle incoming messages. Called when:
 // - a message is received while the app has focus
 // - the user clicks on an app notification created by a sevice worker
 //   `messaging.setBackgroundMessageHandler` handler.
-messaging.onMessage(function(payload) {
+messaging.onMessage(function (payload) {
     console.log("Message received. ", payload);
-	
-	if(payload.data.name !== coffeeLight.loadName()){
-		var notification = new Notification(payload.notification.title, payload.notification);
-	}
+
+    if (payload.data.name !== coffeeLight.loadName()) {
+        var notification = new Notification(payload.notification.title, payload.notification);
+    }
 });
-// [END receive_message]
-function init() {
-    // [START get_token]
+
+function getToken() {
     // Get Instance ID token. Initially this makes a network call, once retrieved
     // subsequent calls to getToken will return from cache.
-    messaging.getToken()
-        .then(function(currentToken) {
+    return messaging.getToken()
+        .then(function (currentToken) {
             if (currentToken) {
-                sendTokenToServer(currentToken);
+                console.log("Got Messaging token");
+                return currentToken;
             } else {
                 // Show permission request.
                 console.log('No Instance ID token available. Request permission to generate one.');
                 // Show permission UI.
-                requestPermission();
+                return requestPermission().then(getToken);
             }
         })
-        .catch(function(err) {
+        .catch(function (err) {
             console.log('An error occurred while retrieving token. ', err);
         });
-}
-// Send the Instance ID token your application server, so that it can:
-// - send messages back to this app
-// - subscribe/unsubscribe the token from topics
-function sendTokenToServer(currentToken) {
-	
-	var name = coffeeLight.loadName();
-	if(!name) {
-		return;
-	}
-	
-	console.log('Sending token to server...');
-	// TODO(developer): Send the current token to your server.
-	fetch("./api/v1/register", {
-		credentials: 'same-origin',
-		method: 'POST',
-		headers: new Headers({
-			"content-type": "application/json"
-		}),
-		body: JSON.stringify({
-			token: currentToken,
-			name: name
-		})
-	});
-}
-
-function showHideDiv(divId, show) {
-    const div = document.querySelector('#' + divId);
-    if (show) {
-        div.style = "display: visible";
-    } else {
-        div.style = "display: none";
-    }
 }
 
 function requestPermission() {
     console.log('Requesting permission...');
-    // [START request_permission]
-    messaging.requestPermission()
-        .then(function() {
+    return messaging.requestPermission()
+        .then(function () {
             console.log('Notification permission granted.');
-            // TODO(developer): Retrieve an Instance ID token for use with FCM.
-            // [START_EXCLUDE]
-            // In many cases once an app has been granted notification permission, it
-            // should update its UI reflecting this.
-            init();
-            // [END_EXCLUDE]
         })
-        .catch(function(err) {
+        .catch(function (err) {
             console.log('Unable to get permission to notify.', err);
         });
-    // [END request_permission]
 }
 
 function deleteToken() {
     // Delete Instance ID token.
-    // [START delete_token]
     messaging.getToken()
-        .then(function(currentToken) {
+        .then(function (currentToken) {
             messaging.deleteToken(currentToken)
-                .then(function() {
+                .then(function () {
                     console.log('Token deleted.');
+                    //TODO update server
                 })
-                .catch(function(err) {
+                .catch(function (err) {
                     console.log('Unable to delete token. ', err);
                 });
-            // [END delete_token]
         })
-        .catch(function(err) {
+        .catch(function (err) {
             console.log('Error retrieving Instance ID token. ', err);
         });
 }
-init();
+
+
+function loginOnServer(user) {
+    return getToken().then((token) => {
+        return fetch("./api/v1/register", {
+            credentials: 'same-origin',
+            method: 'POST',
+            headers: new Headers({
+                "content-type": "application/json"
+            }),
+            body: JSON.stringify({
+                token: token,
+                name: user.displayName,
+                id: user.uid
+            })
+        });
+    });
+}
+
+
+auth.signInAnonymously().catch(console.error);
+
+auth.onAuthStateChanged(function (user) {
+    if (user) {
+        // User is signed in.
+        var isAnonymous = user.isAnonymous;
+        var uid = user.uid;
+
+        console.log("Signed in ", user);
+
+        loginOnServer(user).catch((err) => {
+            console.log("Unable to login on server", err);
+        });
+    } else {
+        // User is signed out.
+
+        console.log("Signed out");
+    }
+});
