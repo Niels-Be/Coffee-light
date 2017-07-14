@@ -12,6 +12,10 @@ let messaging = firebase.messaging();
 
 
 coffeLight.on("sendToUser", (user, payload, options) => {
+    if (user.tokens.size === 0) {
+        console.error("User has no vaild messaging token");
+        return;
+    }
     messaging.sendToDevice([...user.tokens], payload, options)
         .then((res) => {
             console.log("Firebase sendToDevice: ", res);
@@ -32,6 +36,10 @@ coffeLight.on("sendToChannel", (channel, payload, options) => {
 });
 
 coffeLight.on("subscribeToChannel", (user, channel) => {
+    if (user.tokens.size === 0) {
+        console.error("User has no vaild messaging token");
+        return;
+    }
     messaging.subscribeToTopic([...user.tokens], "/topics/" + channel.id)
         .then((res) => {
             console.log("Firebase subscribe: ", res);
@@ -42,6 +50,10 @@ coffeLight.on("subscribeToChannel", (user, channel) => {
 });
 
 coffeLight.on("unsubscribeFromChannel", (user, channel) => {
+    if (user.tokens.size === 0) {
+        console.error("User has no vaild messaging token");
+        return;
+    }
     messaging.unsubscribeFromTopic([...user.tokens], "/topics/" + channel.id)
         .then((res) => {
             console.log("Firebase unsubscribe: ", res);

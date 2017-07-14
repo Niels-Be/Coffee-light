@@ -22,21 +22,22 @@ function authenticated(cb, noHandleError) {
 
 
 
-router.post('/register', authenticated((req, res) => {
-    if (!req.user) {
-        coffeLight.createUser(req.body).then((user) => {
-            req.user = user;
-            req.session.userId = user.id;
-            res.end();
-        });
-
-    } else {
+router.post('/register', authenticated((req, res, next) => {
+    function ensureUser() {
+        if (req.user) return Promise.resolve();
+        return (req.body.id ? coffeLight.getOrCreateUser(req.body.id, req.body) : coffeLight.createUser(req.body))
+            .then((user) => {
+                req.user = user;
+                req.session.userId = user.id;
+            });
+    }
+    ensureUser().then(() => {
         if (req.body.name)
             req.user.name = req.body.name;
         if (req.body.token)
             req.user.addToken(req.body.token);
         res.end();
-    }
+    }).catch(next);
 }, true));
 
 
@@ -93,6 +94,33 @@ router.put('/channel', authenticated((req, res, next) => {
 
 }));
 
+router.post('/channel', authenticated((req, res, next) => {
+    let channel = coffeLight.getChannel(req.body.channelId);
+    if (!channel) {
+        return res.status(400).json({
+            code: 404,
+            error: "Channel not found"
+        });
+    }
+    if (!req.user.subscriptions.has(channel.id)) {
+        return res.status(400).json({
+            code: 403,
+            error: "Not member of that channel"
+        });
+    }
+
+    //Overwrite only existing properties
+    Object.keys(req.body).forEach((key) => {
+        if (key !== "id" && channel.hasOwnProperty(key)) {
+            channel[key] = req.body[key];
+        }
+    });
+
+    res.json({
+        channel: channel
+    });
+}));
+
 router.post('/channel/subscription', authenticated((req, res, next) => {
     let channel = coffeLight.getChannel(req.body.channelId);
     if (!channel) {
@@ -107,9 +135,8 @@ router.post('/channel/subscription', authenticated((req, res, next) => {
             error: "Invalid password"
         });
     }
-    req.user.subscribe(channel).then(() => {
-        res.end();
-    }).catch(next);
+    req.user.subscribe(channel);
+    res.end();
 }));
 
 router.delete('/channel/subscription', authenticated((req, res, next) => {
@@ -120,13 +147,12 @@ router.delete('/channel/subscription', authenticated((req, res, next) => {
             error: "Channel not found"
         });
     }
-    req.user.unsubscribe(channel).then(() => {
-        if (channel.subscriptions <= 0) {
-            //Delete channel if it is empty
-            coffeLight.channels = coffeLight.channels.filter(c => c.id != channel.id);
-        }
-        res.end();
-    }).catch(next);
+    req.user.unsubscribe(channel);
+    if (channel.subscriptions <= 0) {
+        //Delete channel if it is empty
+        coffeLight.channels = coffeLight.channels.filter(c => c.id != channel.id);
+    }
+    res.end();
 }));
 
 
@@ -144,12 +170,11 @@ router.post('/channel/notify', authenticated((req, res, next) => {
             error: "Not member of that channel"
         });
     }
-    channel.notify(req.user).then(() => {
-        req.end();
-    }).catch(next);
+    channel.notify(req.user);
+    res.end();
 }));
 
-router.get('/subscription', authenticated((req, res, next) => {
+router.get('/subscriptions', authenticated((req, res, next) => {
     res.json({
         subscriptions: [...req.user.subscriptions]
     });

@@ -32,6 +32,13 @@ class User {
     send(payload, options) {
         coffeLight.emit("sendToDevice", this, payload, options);
     }
+
+    toJSON() {
+        let res = Object.assign({}, this);
+        res.tokens = [...this.tokens];
+        res.subscriptions = [...this.subscriptions];
+        return res;
+    }
 }
 
 module.exports = User;

@@ -12,7 +12,11 @@ module.exports = function onWebSocketConnect(ws, req) {
 
         let msg = JSON.parse(data);
         Object.keys(msg).forEach((key) => {
-            PacketEmitter.emit(key, msg[key], ws);
+            if (Array.isArray(msg[key])) {
+                msg[key].forEach((m) => PacketEmitter.emit(key, m, ws));
+            } else {
+                PacketEmitter.emit(key, msg[key], ws);
+            }
         });
     });
 
@@ -55,13 +59,13 @@ PacketEmitter.on("unsubscribe", (data, ws) => {
         });
     }
 
-    subscribtions[channel.id] = (subscribtions[channel.id] = subscribtions[channel.id] || []).filter(w => w !== ws);
+    subscribtions[channel.id] = (subscribtions[channel.id] || []).filter(w => w !== ws);
 });
 
 
 
 coffeLight.on("sendToChannel", (channel, payload, options) => {
-    subscribtions[channel.id].forEach((ws) => {
+    (subscribtions[channel.id] || []).forEach((ws) => {
         ws.send(payload);
     });
 });

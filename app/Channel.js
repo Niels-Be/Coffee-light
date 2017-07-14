@@ -6,7 +6,7 @@ class Channel {
         this.password = options.password || "";
         this.ttl = options.ttl || 60;
         this.requestText = options.requestText || "I want coffee!";
-        this.message = options.message || "%n wants coffee";
+        this.message = options.message || "%u wants %c";
         this.title = options.title || "Coffee!!!";
         this.icon = options.icon || "coffee.png";
 
@@ -27,8 +27,8 @@ class Channel {
             },
             data: {
                 "name": user.name,
-                "channel": this.id,
-                "ts": Date.now()
+                "channel": "" + this.id,
+                "ts": "" + Date.now()
             }
         }, {
             timeToLive: this.ttl

@@ -43,13 +43,21 @@ class CoffeLight extends EventEmitter {
         return this.users.find(u => u.id == id);
     }
 
+    getOrCreateUser(id, options) {
+        let user = this.getUser(id);
+        if (user) return Promise.resolve(user);
+        options.id = id;
+        return this.createUser(options);
+    }
+
     createUser(options) {
         if (!options.name) {
             return Promise.reject(new CodeError(400, "User name is required"));
         }
+        let id = options.id || this.userIdCounter++;
 
-        let user = new User(this.userIdCounter++, options);
-        console.log("Created new User[%d] %s", user.id, user.name);
+        let user = new User(id, options);
+        console.log("Created new User[%s] %s", user.id, user.name);
         this.users.push(user);
         return this.save().then(() => user);
     }
@@ -64,7 +72,7 @@ class CoffeLight extends EventEmitter {
         }
 
         let channel = new Channel(this.channelIdCounter++, options);
-        console.log("Created new Channel[%d] %s", channel.id, channel.name);
+        console.log("Created new Channel[%s] %s", channel.id, channel.name);
         this.channels.push(channel);
         return this.save().then(() => channel);
     }
@@ -94,6 +102,9 @@ class CoffeLight extends EventEmitter {
                 if (err) return reject(err);
 
                 let obj = JSON.parse(data);
+                obj.users = obj.users.map(u => new User(u.id, u));
+                obj.channels = obj.channels.map(c => new Channel(c.id, c));
+
                 Object.assign(this, obj);
                 resolve();
             });
