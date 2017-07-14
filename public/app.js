@@ -99,9 +99,6 @@ function deleteToken() {
 
 function loginOnServer(user) {
     return getToken().then((token) => {
-        if (user.displayName == null) {
-            return changeName("Coffee Lover");
-        }
         return fetch("./api/v1/register", {
             credentials: 'same-origin',
             method: 'POST',
@@ -123,8 +120,12 @@ auth.signInAnonymously().catch(console.error);
 auth.onAuthStateChanged(function (user) {
     if (user) {
         // User is signed in.
-        var isAnonymous = user.isAnonymous;
-        var uid = user.uid;
+        if (user.displayName === null) {
+            user.displayName = "Coffee Lover";
+            auth.currentUser.updateProfile({
+                displayName: "Coffee Lover"
+            });
+        }
 
         console.log("Signed in ", user);
 
