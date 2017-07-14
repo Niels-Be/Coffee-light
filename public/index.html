@@ -1,72 +1,43 @@
-<!DOCTYPE html>
 <html>
 
 <head>
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	
-	<link rel="manifest" href="/manifest.json">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Angular Material style sheet -->
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.css">
+</head>
 
+<body ng-app="coffeLight" ng-cloak>
+    
+	<link rel="manifest" href="/manifest.json">
+	<script src="./resize-observer-polyfill.js"></script>
 	<script src="https://www.gstatic.com/firebasejs/4.1.3/firebase-app.js"></script>
 	<script src="https://www.gstatic.com/firebasejs/4.1.3/firebase-messaging.js"></script>
+	<script type="text/javascript">
 	
-	<style>
-		button.coffee {
-			display: inline-block;
-			text-align: center;
-			cursor: pointer;
-			overflow: hidden;
-			transition: background-color 0.3s linear;
-		}
-		button.coffee:after {
-			content: "";
-			display: block;
-			position: absolute;
-			width: 100%;
-			height: 100%;
-			top: 0;
-			left: 0;
-			pointer-events: none;
-			background-image: radial-gradient(circle, black 20%, rgba(0, 0, 0, 0) 19%);
-			transform: scale(5);
-			opacity: 0;
-			transition: transform 1.5s, opacity 1s;
-		}
-		button.coffee:active:after {
-			transform: scale(0);
-			opacity: .2;
-			transition: 0s;
-		}
-	</style>
-	
-	<script>
-		"use strict";
 		var coffeeLight = coffeeLight || {};
-		
 		coffeeLight.size = 0.7;
 		
-		coffeeLight.buttonClick = () => {
-			fetch("./api/v1/coffee", {
-			  "method": "POST",
+		coffeeLight.loadName = () => {
+			name = localStorage.getItem("coffeeLight.name") || "Coffee Lover";
+			return name;
+		};
+		
+		coffeeLight.createGroup = (name) => {
+			return fetch("./api/v1/channel", {
+			  "credentials": 'same-origin',
+			  "method": "PUT",
 			  "headers": {
 				"content-type": "application/json",
-				"cache-control": "no-cache",
 			  },
 			  "body": JSON.stringify({
-				"name": coffeeLight.loadName()
+				"name": name
 			  })
 			});
 		};
 		
-		coffeeLight.renderGroups = () => {
-			coffeeLight.loadGroups().then(groups => {
-				var groupsContainer = document.getElementById("groupsContainer");
-				while(groupsContainer.childElementCount > 0) {groupsContainer.removeChild(groupsContainer.firstElementChild)};
-				groups.forEach( group => {
-					var div = document.createElement("div");
-					div.innerText = group.name;
-					groupsContainer.appendChild(div);
-				});
-			});
+		coffeeLight.changeName = (name) => {
+			localStorage.setItem("coffeeLight.name", name);
+			init();
 		};
 		
 		coffeeLight.loadGroups = () => {
@@ -78,87 +49,275 @@
 			.then((data) => data.channels);
 		};
 		
-		coffeeLight.createGroup = () => {
-			var name = prompt("Group Name");
-			fetch("./api/v1/channel", {
-			  "credentials": 'same-origin',
-			  "method": "PUT",
-			  "headers": {
-				"content-type": "application/json",
-			  },
-			  "body": JSON.stringify({
-				"name": name
-			  })
-			}).then(coffeeLight.renderGroups);
-		};
-		
-		coffeeLight.changeName = () => {
-			var name = prompt("Name");
-			document.getElementById("nameSpan").innerText = name;
-			localStorage.setItem("coffeeLight.name", name);
-			init();
-		};
-		
-		coffeeLight.loadName = () => {
-			name = localStorage.getItem("coffeeLight.name") || "Coffee Lover";
-			document.getElementById("nameSpan").innerText = name;
-			return name;
-		};
-		
 		coffeeLight.setStyle = () => {
-			var availableSpace = Math.min(window.innerHeight, window.innerWidth);
+
+			
+			coffeeLight.button = coffeeLight.button || document.getElementById("button");
+			coffeeLight.handle = coffeeLight.handle || document.getElementById("handle");
+			var parent = coffeeLight.button.parentElement;
+			var availableSpace = Math.min(parent.offsetHeight, parent.offsetWidth);
 			var diameter = coffeeLight.size * availableSpace;
+			
 			coffeeLight.button.style.width  = diameter + "px";
 			coffeeLight.button.style.height = diameter + "px";
 			coffeeLight.button.style.fontSize = 1.5 * diameter + "%";
 			coffeeLight.button.style.borderWidth = 0.04 * diameter + "px";
-			coffeeLight.button.style.margin = ((window.innerHeight - diameter)/2 + "px") + " " + ((window.innerWidth - diameter)/2 + "px");
+			coffeeLight.button.style.margin = ((parent.offsetHeight - diameter)/2 + "px") + " " + ((parent.offsetWidth - diameter)/2 + "px");
 			
 			var handleHeight = 0.05 * diameter;
 			var handleWidth  = 0.25 * diameter;
 			
-			if(window.innerWidth > window.innerHeight) {
+			if(parent.offsetWidth > parent.offsetHeight) {
 				coffeeLight.handle.style.height = handleHeight + "px";
 				coffeeLight.handle.style.width  = handleWidth  + "px";
-				coffeeLight.handle.style.top  = (window.innerHeight - handleHeight)/2 + "px";
-				coffeeLight.handle.style.left = (window.innerWidth - diameter)/2 - 0.95 * handleWidth + "px";
+				coffeeLight.handle.style.top  = (parent.offsetHeight - handleHeight)/2 + "px";
+				coffeeLight.handle.style.left = (parent.offsetWidth - diameter)/2 - 0.95 * handleWidth + "px";
 				coffeeLight.handle.style.borderRadius = "50% 0% 0% 50%";
 			}
 			else {
 				coffeeLight.handle.style.width  = handleHeight + "px";
 				coffeeLight.handle.style.height = handleWidth  + "px";
-				coffeeLight.handle.style.left = (window.innerWidth  - handleHeight)/2 + "px";
-				coffeeLight.handle.style.top  = (window.innerHeight + diameter)/2 + "px";
+				coffeeLight.handle.style.left = (parent.offsetWidth  - handleHeight)/2 + "px";
+				coffeeLight.handle.style.top  = (parent.offsetHeight + diameter)/2 + "px";
 				coffeeLight.handle.style.borderRadius = "0% 0% 50% 50%";
 			}
 		}
-		
-		window.onload = () => {
-			document.getElementById("changeNameBtn").onclick  = coffeeLight.changeName;
-			document.getElementById("createGroupBtn").onclick = coffeeLight.createGroup;
-			coffeeLight.button = document.getElementById("button");
-			coffeeLight.button.onclick = coffeeLight.buttonClick;
-			coffeeLight.handle = document.getElementById("handle");
-			coffeeLight.setStyle();
-			coffeeLight.loadName();
-			coffeeLight.renderGroups();
-		};
-		window.onresize = coffeeLight.setStyle;
 	</script>
-</head>
-
-<body style="font-family: Arial; background-color: black; color: white;">
-	<span>Hello <span id="nameSpan">Philipp</span>&nbsp;<button id="changeNameBtn">change name</button></span><br>
-	<button id="createGroupBtn">Create Group</button>
-	<div id="groupsContainer" style="cursor: pointer"></div>
-	
-    <button class="coffee" id="button" style="outline:none; position: absolute; top:0; left: 0; background: #6F4E37; color: white; border: solid; border-radius: 50%; width: 70%; height: 70%;">
-		I want coffee!
-	</button>
-	<div id="handle" style="position: absolute; background-color: white; border-radius: 50% 0% 0% 50%">
-		
-	</div>
 	<script src="app.js"></script>
+
+    <!-- Angular Material requires Angular.js Libraries -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular-animate.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular-aria.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular-messages.min.js"></script>
+
+    <!-- Angular Material Library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.4/angular-material.js"></script>
+
+    <!-- Your application bootstrap  -->
+    <script type="text/javascript">
+        angular
+            .module('coffeLight', ['ngMaterial', 'ngMessages'])
+            .controller('AppCtrl', function($scope, $timeout, $mdSidenav, $log, $mdDialog) {
+				$scope.toggleLeft = buildDelayedToggler('left');
+				
+				angular.element(document).ready(function () {
+					console.log("ready");
+					coffeeLight.setStyle();
+				});
+
+				window.onload = () => {
+					new ResizeObserver(coffeeLight.setStyle).observe(document.getElementById("buttonContainer"));
+				};
+				
+				$scope.name = coffeeLight.loadName();
+				
+				$scope.groups = [{"name" : "Loading..."}];
+				coffeeLight.loadGroups().then((groups) => {
+					$scope.$apply(() => {$scope.groups = groups;}); 
+				});
+				
+				$scope.showSetName = function(ev) {
+					var confirm = $mdDialog.prompt()
+					  .title("What's your name?")
+					  .placeholder('Name')
+					  .ariaLabel('Name')
+					  .initialValue('Coffee Lover')
+					  .targetEvent(ev)
+					  .ok('Save')
+					  .cancel('Cancle');
+
+					$mdDialog.show(confirm).then(function(result) {
+						coffeeLight.changeName(result);
+						$scope.name = coffeeLight.loadName();
+					}, function() {
+						// ignore
+					});
+				};
+				
+				$scope.showCreateGroup = function(ev) {
+					var confirm = $mdDialog.prompt()
+					  .title("Name your Group")
+					  .placeholder('Name')
+					  .ariaLabel('Name')
+					  .initialValue('Coffee Lovers')
+					  .targetEvent(ev)
+					  .ok('Save')
+					  .cancel('Cancle');
+
+					$mdDialog.show(confirm).then(function(result) {
+						coffeeLight.createGroup(result);
+					}, function() {
+					  // ignore
+					});
+				};
+				
+				  
+				   $scope.showJoinGroup = function (ev) {
+					$mdDialog.show({
+					  clickOutsideToClose: true,
+					  contentElement     : '#myStaticDialog',
+					  parent             : angular.element(document.body),
+					  targetEvent        : ev
+					});
+				  };
+
+				  function DialogController($scope, $mdDialog) {
+					$scope.hide   = function () {
+					  $mdDialog.hide();
+					};
+
+					$scope.cancel = function () {
+					  $mdDialog.cancel();
+					};
+				  }
+				 
+				$scope.hideJoinDialog = function() {
+					console.log("close");
+					$mdDialog.hide();
+				};
+
+
+                function debounce(func, wait, context) {
+                    var timer;
+
+                    return function debounced() {
+                        var context = $scope,
+                            args = Array.prototype.slice.call(arguments);
+                        $timeout.cancel(timer);
+                        timer = $timeout(function() {
+                            timer = undefined;
+                            func.apply(context, args);
+                        }, wait || 10);
+                    };
+                }
+
+                function buildDelayedToggler(navID) {
+                    return debounce(function() {
+                        $mdSidenav(navID)
+                            .toggle()
+                            .then(function() {
+                                $log.debug("toggle " + navID + " is done");
+                            });
+                    }, 200);
+                }
+
+                function buildToggler(navID) {
+                    return function() {
+                        $mdSidenav(navID)
+                            .toggle()
+                            .then(function() {
+                                $log.debug("toggle " + navID + " is done");
+                            });
+                    };
+                }
+            })
+            .controller('LeftCtrl', function($scope, $timeout, $mdSidenav, $log) {
+                $scope.close = function() {
+                    $mdSidenav('left').close()
+                        .then(function() {
+                            $log.debug("close LEFT is done");
+                        });
+
+                };
+            })
+			.config(function($mdIconProvider, $sceDelegateProvider) {
+				$sceDelegateProvider.resourceUrlWhitelist(["self", "https://raw.githubusercontent.com/google/**"]);
+				$mdIconProvider
+				.iconSet('navigation', "https://raw.githubusercontent.com/google/material-design-icons/master/sprites/svg-sprite/svg-sprite-navigation.svg", 24)
+				.iconSet('social',     "https://raw.githubusercontent.com/google/material-design-icons/master/sprites/svg-sprite/svg-sprite-social.svg", 24);
+			})
+			.config(function($mdThemingProvider) {
+				$mdThemingProvider.theme('default').dark();
+			})
+			.directive('onFinishRender', function ($timeout) {
+				return {
+					restrict: 'A',
+					link: function (scope, element, attr) {
+						if (scope.$last === true) {
+							$timeout(function () {
+								scope.$emit(attr.onFinishRender);
+							});
+						}
+					}
+				}
+			});
+
+    </script>
+
+    <div ng-controller="AppCtrl" layout="column" style="height:100%;" ng-cloak>
+
+        <section layout="row" flex>
+
+            <md-sidenav 
+				layout="column"
+				class="md-sidenav-left md-whiteframe-z2 md-navigation-drawer" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')" md-whiteframe="4">
+
+                <md-toolbar class="md-theme-indigo">
+                    <h1 class="md-toolbar-tools">Hello {{name}}</h1>
+                </md-toolbar>
+					
+					<div layout="column" layout-align="space-between stretch" style="height: 100%;">
+					   <md-list>
+						  <md-list-item ng-click="showJoinGroup($event)" ng-repeat="group in groups" role="link">
+							<p>{{group.name}}</p>
+						  </md-list-item>
+						  
+					  </md-list>
+					  
+					  <md-list>
+						  <md-divider></md-divider>
+						  <md-list-item ng-click="showSetName($event)" role="link">
+							<!--TODO: find icon <md-icon md-svg-icon="social:ic_group_add_24px"></md-icon>-->
+							<p class="md-body-2">Change Name</p>
+						  </md-list-item>
+						  <md-list-item ng-click="showJoinGroup($event)" role="link">
+							<md-icon md-svg-icon="social:ic_group_add_24px"></md-icon>
+							<p class="md-body-2">Join a Group</p>
+						  </md-list-item>
+						  <md-list-item ng-click="showCreateGroup($event)" role="link">
+							<md-icon md-svg-icon="social:ic_group_add_24px"></md-icon>
+							<p class="md-body-2">Create a Group</p>
+						  </md-list-item>
+					  </md-list>
+				  </div>
+
+            </md-sidenav>
+
+			<md-content layout="column" layout-fill>
+				<md-toolbar class="animate-show md-whiteframe-z1">
+					<div class="md-toolbar-tools">
+						<md-button class="md-icon-button" ng-click="toggleLeft()" hide-gt-sm aria-label="Menu">
+							<md-icon md-svg-icon="navigation:ic_menu_24px" aria-label="Menu"></md-icon>
+						</md-button>
+					</div>
+				</md-toolbar>
+				
+				<md-content onload="setStyle()" id="buttonContainer" flex layout-padding>
+				    <button   class="coffee" id="button" style="outline:none; position: absolute; top:0; left: 0; background: #6F4E37; color: white; border: solid white; border-radius: 50%; width: 70%; height: 70%;">
+						I want coffee!
+					</button>
+					<div on-init="setStyle()" id="handle" style="position: absolute; background-color: white; border-radius: 50% 0% 0% 50%">
+				</md-content>
+			</md-content>
+				
+        </section>
+		
+		<div style="visibility: hidden">
+			<div class="md-dialog-container" id="myStaticDialog">
+			  <md-dialog layout-padding="">
+				<h2>Test</h2>
+				<p>ABC</p>
+				<p>DEF</p>
+				<div layout-align="center" layout="row">
+				  <md-button aria-label="Close" class="md-raised md-primary" ng-click="hideJoinDialog()">Close</md-button>
+				</div>
+			  </md-dialog>
+			</div>
+		</div>
+
+    </div>
+
 </body>
 
 </html>
