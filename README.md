@@ -21,6 +21,10 @@ PUT /channel
 body: { name, password, ttl, requestText, message, title, icon }
 Create new channel and subscribe to it
 
+POST /channel
+body: { channelId, name, password, ttl, requestText, message, title, icon }
+Update an existing channel
+
 POST /channel/subscription
 body: { channelId, password }
 Subscribe to channel, optional password
