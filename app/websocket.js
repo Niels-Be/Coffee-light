@@ -41,7 +41,7 @@ module.exports = function onWebSocketConnect(ws, req) {
 };
 
 PacketEmitter.on("subscribe", (data, ws) => {
-    let channel = app.getChannel(data.channelId);
+    let channel = coffeLight.getChannel(data.channelId);
     if (!channel) {
         return ws.send({
             error: {
@@ -61,7 +61,7 @@ PacketEmitter.on("subscribe", (data, ws) => {
 });
 
 PacketEmitter.on("unsubscribe", (data, ws) => {
-    let channel = app.getChannel(data.channelId);
+    let channel = coffeLight.getChannel(data.channelId);
     if (!channel) {
         return ws.send({
             error: {
