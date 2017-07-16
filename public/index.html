@@ -160,7 +160,7 @@
 					  .initialValue(auth.currentUser ? auth.currentUser.displayName : 'Coffee Lover')
 					  .targetEvent(ev)
 					  .ok('Save')
-					  .cancel('Cancle');
+					  .cancel('Cancel');
 
 					$mdDialog.show(confirm).then(function(result) {
 						coffeeLight.changeName(result);
@@ -342,7 +342,7 @@
 					</md-input-container>
 				</div>
 				<div layout-align="center" layout="row">
-				  <md-button aria-label="Cancle" class="md-primary" ng-click="hideDialog()">Cancle</md-button>
+				  <md-button aria-label="Cancel" class="md-primary" ng-click="hideDialog()" >Cancel</md-button>
 				  <md-button aria-label="Create" class="md-primary" ng-click="createGroup()">Create</md-button>
 				</div>
 			  </md-dialog>
@@ -371,7 +371,7 @@
 						<input ng-disabled="!joinGroupSelected.hasPassword" autocomplete="new-password" type="password" ng-model="joinGroupPassword">
 				</md-input-container>
 				<div layout-align="center" layout="row">
-				  <md-button aria-label="Cancle" class="md-primary" ng-click="hideDialog()">Cancle</md-button>
+				  <md-button aria-label="Cancel" class="md-primary" ng-click="hideDialog()">Cancel</md-button>
 				  <md-button aria-label="Join"   class="md-primary" ng-click="joinGroup(joinGroupSelected, joinGroupPassword)">Join</md-button>
 				</div>
 			  </md-dialog>
