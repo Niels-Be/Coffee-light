@@ -83,7 +83,7 @@
     <script type="text/javascript">
         angular
             .module('coffeLight', ['ngMaterial', 'ngMessages'])
-            .controller('AppCtrl', function($scope, $timeout, $mdSidenav, $log, $mdDialog) {
+            .controller('AppCtrl', function($scope, $timeout, $mdSidenav, $log, $mdDialog, $mdToast) {
 				$scope.toggleLeft = buildDelayedToggler('left');
 				
 				angular.element(document).ready(function () {
@@ -97,10 +97,22 @@
 				
 				$scope.name = coffeeLight.loadName();
 				
-				$scope.joinGroup = group => {
-					subscribeToChannel(group.id)
+				$scope.joinGroup = (group, password) => {
+					subscribeToChannel(group.id, password)
 					.then($scope.hideDialog)
-					.then(updateGroupsBinding);
+					.then(updateGroupsBinding)
+					.catch(e => {
+						e.json().then(e => $scope.showError(e.error));
+					});
+				};
+				
+				$scope.showError =  msg => {
+					console.error(msg);
+					$mdToast.show(
+					  $mdToast.simple()
+						.textContent(msg)
+						.hideDelay(3000)
+					);
 				};
 				
 				$scope.buttonClicked = () => {
@@ -145,26 +157,7 @@
 						// ignore
 					});
 				};
-				
-				$scope.showCreateGroup = function(ev) {
-					var confirm = $mdDialog.prompt()
-					  .title("Name your Group")
-					  .placeholder('Name')
-					  .ariaLabel('Name')
-					  .initialValue('Coffee Lovers')
-					  .targetEvent(ev)
-					  .ok('Save')
-					  .cancel('Cancle');
 
-					$mdDialog.show(confirm).then(function(result) {
-						createChannel({
-							name: result
-						}).then(updateGroupsBinding);
-					}, function() {
-					  // ignore
-					});
-				};
-				
 				$scope.searchGroups = query => {
 					return searchChannels(query).then(r => r.channels);
 				};
@@ -182,17 +175,19 @@
 				}
 				
 				$scope.showJoinGroup = showDialogFactory("dialogJoin");
-
-				  function DialogController($scope, $mdDialog) {
-					$scope.hide   = function () {
-					  $mdDialog.hide();
+				$scope.showCreateGroup = showDialogFactory("dialogCreate");
+				$scope.createGroup = () => {
+					var options = {
+						name: $scope.createGroupName
 					};
-
-					$scope.cancel = function () {
-					  $mdDialog.cancel();
-					};
-				  }
-				 
+					if(!$scope.createGroupNoPassword){
+						options.password = $scope.createGroupPassword;
+					}
+					createChannel(options)
+						.then($scope.hideDialog)
+						.then(updateGroupsBinding);
+				};
+				
 				$scope.hideDialog = function() {
 					$mdDialog.hide();
 				};
@@ -316,13 +311,27 @@
         </section>
 		
 		<div style="visibility: hidden">
-			<div class="md-dialog-container" id="myStaticDialog">
+			<div class="md-dialog-container" id="dialogCreate">
 			  <md-dialog layout-padding="">
-				<h2>Test</h2>
-				<p>ABC</p>
-				<p>DEF</p>
+				<h2>Create Group</h2>
+				<div class="flex flex-col">
+					<md-input-container class="md-block">
+						<label>Name</label>
+						<input autocomplete="off" ng-model="createGroupName">
+					</md-input-container>
+					<md-input-container class="md-block">
+						<md-checkbox ng-model="createGroupNoPassword">
+						  No Password
+						</md-checkbox>
+					</md-input-container>
+					<md-input-container class="md-block">
+						<label>Password</label>
+						<input ng-disabled="createGroupNoPassword" autocomplete="new-password" type="password" ng-model="createGroupPassword">
+					</md-input-container>
+				</div>
 				<div layout-align="center" layout="row">
 				  <md-button aria-label="Close" class="md-raised md-primary" ng-click="hideDialog()">Close</md-button>
+				  <md-button aria-label="Create" class="md-raised md-primary" ng-click="createGroup()">Create</md-button>
 				</div>
 			  </md-dialog>
 			</div>
@@ -345,9 +354,13 @@
 					  No groups matching "{{searchText}}" were found.
 					</md-not-found>
 				</md-autocomplete>
+				<md-input-container class="md-block">
+						<label>Password</label>
+						<input ng-disabled="!joinGroupSelected.hasPassword" autocomplete="new-password" type="password" ng-model="joinGroupPassword">
+				</md-input-container>
 				<div layout-align="center" layout="row">
 				  <md-button aria-label="Cancle" class="md-raised md-primary" ng-click="hideDialog()">Cancle</md-button>
-				  <md-button aria-label="Create" class="md-raised md-primary" ng-click="joinGroup(joinGroupSelected)">Join</md-button>
+				  <md-button aria-label="Create" class="md-raised md-primary" ng-click="joinGroup(joinGroupSelected, joinGroupPassword)">Join</md-button>
 				</div>
 			  </md-dialog>
 			</div>
