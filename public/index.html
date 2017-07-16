@@ -29,19 +29,6 @@
 			return name;
 		};
 		
-		coffeeLight.createGroup = (name) => {
-			return fetch("./api/v1/channel", {
-			  "credentials": 'same-origin',
-			  "method": "PUT",
-			  "headers": {
-				"content-type": "application/json",
-			  },
-			  "body": JSON.stringify({
-				"name": name
-			  })
-			});
-		};
-		
 		coffeeLight.changeName = (name) => {
 			localStorage.setItem("coffeeLight.name", name);
 			changeName(name);
@@ -179,7 +166,9 @@
 					  .cancel('Cancle');
 
 					$mdDialog.show(confirm).then(function(result) {
-						coffeeLight.createGroup(result).then(updateGroupsBinding)
+						createChannel({
+							name: result
+						}).then(updateGroupsBinding);
 					}, function() {
 					  // ignore
 					});
