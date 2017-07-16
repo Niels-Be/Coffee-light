@@ -43,18 +43,18 @@ module.exports = function onWebSocketConnect(ws, req) {
 PacketEmitter.on("subscribe", (data, ws) => {
     let channel = coffeLight.getChannel(data.channelId);
     if (!channel) {
-        return ws.send({
+        return ws.send(JSON.stringify({
             error: {
                 message: "Channel not found"
             }
-        });
+        }));
     }
     if (channel.password && data.password !== channel.password) {
-        return ws.send({
+        return ws.send(JSON.stringify({
             error: {
                 message: "Channel password invalid"
             }
-        });
+        }));
     }
 
     (subscribtions[channel.id] = subscribtions[channel.id] || []).push(ws);
@@ -63,11 +63,11 @@ PacketEmitter.on("subscribe", (data, ws) => {
 PacketEmitter.on("unsubscribe", (data, ws) => {
     let channel = coffeLight.getChannel(data.channelId);
     if (!channel) {
-        return ws.send({
+        return ws.send(JSON.stringify({
             error: {
                 message: "Channel not found"
             }
-        });
+        }));
     }
 
     subscribtions[channel.id] = (subscribtions[channel.id] || []).filter(w => w !== ws);
@@ -77,7 +77,7 @@ PacketEmitter.on("unsubscribe", (data, ws) => {
 
 coffeLight.on("sendToChannel", (channel, payload, options) => {
     (subscribtions[channel.id] || []).forEach((ws) => {
-        ws.send(payload);
+        ws.send(JSON.stringify(payload));
     });
 });
 
