@@ -34,15 +34,6 @@
 			changeName(name);
 		};
 		
-		coffeeLight.loadGroups = () => {
-			return fetch("./api/v1/channels", {
-			  "credentials": 'same-origin',
-			  "method": "GET"
-			})
-			.then(response => response.json())
-			.then((data) => data.channels);
-		};
-		
 		coffeeLight.setStyle = () => {
 
 			
