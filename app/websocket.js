@@ -9,8 +9,19 @@ module.exports = function onWebSocketConnect(ws, req) {
 
     ws.on('message', (data) => {
         console.log("WebSocket Message: ", typeof data, data);
-
-        let msg = JSON.parse(data);
+		
+		var msg = {};
+		try {
+			msg = JSON.parse(data);
+		}
+		catch (e) {
+			ws.send(JSON.stringify({
+				error: {
+					message: "Could not parse request: " + e
+				}
+			}));
+		}
+		
         Object.keys(msg).forEach((key) => {
             if (Array.isArray(msg[key])) {
                 msg[key].forEach((m) => PacketEmitter.emit(key, m, ws));
