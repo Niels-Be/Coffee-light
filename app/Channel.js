@@ -5,6 +5,7 @@ class Channel {
         this.name = options.name;
         this.password = options.password || "";
         this.ttl = options.ttl || 60;
+        this.type = options.type || Channel.TYPE.COFFEE;
         this.requestText = options.requestText || "I want coffee!";
         this.message = options.message || "%u wants %c";
         this.title = options.title || "Coffee!!!";
@@ -36,6 +37,12 @@ class Channel {
     }
 
 }
+
+Channel.TYPE = {
+    COFFEE: "coffee",
+    LUNCH: "lunch",
+    KICKER: "kicker"
+};
 
 
 function formatMessage(msg, channel, user) {
