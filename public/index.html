@@ -212,18 +212,25 @@
 					};
 				}
 				
+				$scope.createGroup = {};
 				$scope.showJoinGroup = showDialogFactory("dialogJoin");
 				$scope.showCreateGroup = showDialogFactory("dialogCreate");
-				$scope.createGroup = () => {
+				$scope.createGroupSubmit = () => {
 					var options = {
-						name: $scope.createGroupName
+						name: $scope.createGroup.name,
+						password: $scope.createGroup.password || undefined,
+						type: $scope.createGroup.type || undefined,
+						message: $scope.createGroup.message || undefined
 					};
-					if(!$scope.createGroupNoPassword){
-						options.password = $scope.createGroupPassword;
-					}
+					$scope.createGroup = {};
+					
+					console.log("Create Channel", options);
 					createChannel(options)
 						.then($scope.hideDialog)
-						.then(updateGroupsBinding);
+						.then(updateGroupsBinding)
+						.catch(e => {
+							e.json().then(e => $scope.showError(e.error));
+						});
 				};
 				
 				$scope.hideDialog = function() {
@@ -351,26 +358,35 @@
 		<div style="visibility: hidden">
 			<div class="md-dialog-container" id="dialogCreate">
 			  <md-dialog layout-padding="">
-				<h2>Create Group</h2>
-				<div class="flex flex-col">
-					<md-input-container class="md-block">
-						<label>Name</label>
-						<input autocomplete="off" ng-model="createGroupName">
-					</md-input-container>
-					<md-input-container class="md-block">
-						<md-checkbox ng-model="createGroupNoPassword">
-						  No Password
-						</md-checkbox>
-					</md-input-container>
-					<md-input-container class="md-block">
-						<label>Password</label>
-						<input ng-disabled="createGroupNoPassword" autocomplete="new-password" type="password" ng-model="createGroupPassword">
-					</md-input-container>
-				</div>
-				<div layout-align="center" layout="row">
-				  <md-button aria-label="Cancel" class="md-primary" ng-click="hideDialog()" >Cancel</md-button>
-				  <md-button aria-label="Create" class="md-primary" ng-click="createGroup()">Create</md-button>
-				</div>
+				  <form name="createGroup" ng-submit="createGroupSubmit()">
+					<h2>Create Group</h2>
+					<div class="flex flex-col">
+						<md-input-container class="md-block">
+							<label>Name</label>
+							<input type="text" required ng-model="createGroup.name">
+						</md-input-container>
+						<md-input-container class="md-block">
+							<label>Password</label>
+							<input type="password" ng-model="createGroup.password">
+						</md-input-container>
+						<md-input-container class="md-block">
+							<label>Type</label>
+							<md-select ng-model="createGroup.type">
+								<md-option value="coffee" selected>Coffee</md-option>
+								<md-option value="lunch">Lunch</md-option>
+								<md-option value="kicker">Kicker</md-option>
+							</md-select>
+						</md-input-container>
+						<md-input-container class="md-block">
+							<label>Message</label>
+							<input placeholder="%n wants %c" type="text" ng-model="createGroup.message">
+						</md-input-container>
+					</div>
+					<div layout-align="center" layout="row">
+					  <md-button aria-label="Cancel" class="md-primary" type="reset" ng-click="hideDialog()" >Cancel</md-button>
+					  <md-button aria-label="Create" class="md-primary" type="submit">Create</md-button>
+					</div>
+				</form>
 			  </md-dialog>
 			</div>
 			
