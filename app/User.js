@@ -13,7 +13,7 @@ class User {
         if (!this.tokens.has(token)) {
             this.tokens.add(token);
             [...this.subscriptions]
-                .map(s => coffeLight.getChannel(s))
+            .map(s => coffeLight.getChannel(s))
                 .forEach(c => coffeLight.emit("subscribeToChannel", this, c));
         }
     }
@@ -23,15 +23,19 @@ class User {
     }
 
     subscribe(channel) {
-        channel.subscriptions++;
-        this.subscriptions.add(channel.id);
-        coffeLight.emit("subscribeToChannel", this, channel);
+        if (!this.subscriptions.has(channel.id)) {
+            channel.subscriptions++;
+            this.subscriptions.add(channel.id);
+            coffeLight.emit("subscribeToChannel", this, channel);
+        }
     }
 
     unsubscribe(channel) {
-        channel.subscriptions--;
-        this.subscriptions.delete(channel.id);
-        coffeLight.emit("unsubscribeFromChannel", this, channel);
+        if (this.subscriptions.has(channel.id)) {
+            channel.subscriptions--;
+            this.subscriptions.delete(channel.id);
+            coffeLight.emit("unsubscribeFromChannel", this, channel);
+        }
     }
 
     send(payload, options) {
