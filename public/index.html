@@ -143,7 +143,15 @@
 				
 				$scope.buttonClicked = (event) => {
 					if(!event.isTrusted) {return;}
-					sendNotification($scope.activeGroupId);
+					sendNotification($scope.activeGroupId).catch(e => {
+						e.json().then((e) => {
+							if(e.code == 429) {
+								console.log("Notify Rate Limited");
+							} else {
+								$scope.showError(e.error)
+							}
+						});
+					});
 				};
 				
 				$scope.$watch("activeGroupId", (id) => {
