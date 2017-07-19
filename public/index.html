@@ -184,6 +184,7 @@
 				}
 				
 				$scope.activateGroup = (id) => {
+					$mdSidenav('left').close();
 					$scope.activeGroupId = id;
 				}
 				
@@ -280,15 +281,6 @@
                             });
                     };
                 }
-            })
-            .controller('LeftCtrl', function($scope, $timeout, $mdSidenav, $log) {
-                $scope.close = function() {
-                    $mdSidenav('left').close()
-                        .then(function() {
-                            $log.debug("close LEFT is done");
-                        });
-
-                };
             })
 			.config(function($mdIconProvider, $sceDelegateProvider) {
 				$sceDelegateProvider.resourceUrlWhitelist(["self", "https://raw.githubusercontent.com/google/**"]);
