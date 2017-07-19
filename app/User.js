@@ -5,6 +5,8 @@ class User {
         this.tokens = new Set(options.tokens || []);
         this.subscriptions = new Set(options.subscriptions || []);
 
+        this.lastNotify = 0;
+
         if (options.token)
             this.addToken(options.token);
     }

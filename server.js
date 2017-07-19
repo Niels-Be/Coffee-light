@@ -12,7 +12,8 @@ const CoffeLight = require('./app/app');
 
 let config = {
     externalUrl: "http://localhost:8080",
-    storageDb: "db.json"
+    storageDb: "db.json",
+    notifyTimeout: 10 * 1000
 };
 
 if (fs.existsSync(__dirname + "/config.json")) {

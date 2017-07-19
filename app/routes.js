@@ -158,6 +158,14 @@ router.delete('/channel/subscription', authenticated((req, res, next) => {
 
 
 router.post('/channel/notify', authenticated((req, res, next) => {
+    if(Date.now() - req.user.lastNotify < coffeLight.config.notifyTimeout) {
+        return res.status(400).json({
+            code: 429,
+            error: "To many notify requests"
+        });
+    }
+    req.user.lastNotify = Date.now();
+
     let channel = coffeLight.getChannel(req.body.channelId);
     if (!channel) {
         return res.status(400).json({
