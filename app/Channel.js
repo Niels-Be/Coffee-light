@@ -19,6 +19,7 @@ class Channel {
     }
 
     notify(user) {
+        console.log("Channel Notify %s", this.name);
         return this.send({
             notification: {
                 "title": this.title,
