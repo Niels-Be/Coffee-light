@@ -141,7 +141,8 @@
 					);
 				};
 				
-				$scope.buttonClicked = () => {
+				$scope.buttonClicked = (event) => {
+					if(!event.isTrusted) {return;}
 					sendNotification($scope.activeGroupId);
 				};
 				
@@ -346,7 +347,7 @@
 				</md-toolbar>
 				
 				<md-content onload="setStyle()" id="buttonContainer" flex layout-padding>
-				    <button ng-click="buttonClicked()" class="coffee" id="button" style="outline:none; position: absolute; top:0; left: 0; background: #6F4E37; color: white; border: solid white; border-radius: 50%; width: 70%; height: 70%;">
+				    <button ng-click="buttonClicked($event)" class="coffee" id="button" style="outline:none; position: absolute; top:0; left: 0; background: #6F4E37; color: white; border: solid white; border-radius: 50%; width: 70%; height: 70%;">
 						{{activeGroup.requestText}}
 					</button>
 					<div id="handle" style="position: absolute; background-color: white; border-radius: 50% 0% 0% 50%">
