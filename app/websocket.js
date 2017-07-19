@@ -85,12 +85,12 @@ PacketEmitter.on("unsubscribe", (data, ws) => {
 
 
 coffeLight.on("sendToChannel", (channel, payload, options) => {
-    (subscribtions[channel.id] || []).forEach((ws) => {
+    (subscribtions[channel.id] || []).forEach((ws, index) => {
         if (ws.readyState === 1) {
             ws.send(JSON.stringify(payload));
         } else {
-            //TODO handle broken sockets
-            console.log("Websocket Connection is broken");
+            console.log("Websocket Connection is broken"); 
+            subscribtions[channel.id].splice(index, 1);
         }
     });
 });
