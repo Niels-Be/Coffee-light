@@ -121,6 +121,23 @@
 					new ResizeObserver(coffeeLight.setStyle).observe(document.getElementById("buttonContainer"));
 				};
 				
+				window.onhashchange = () => {
+					var fn = () => {
+						var newId = parseInt(window.location.hash.substr(1));
+						if(isNaN(newId)) {
+							return;
+						}
+						$scope.activeGroupId = newId;
+					}
+					if($scope.$$phase == "$apply") {
+						fn();
+					}
+					else {
+						$scope.$apply(fn);
+					}
+				};
+				window.onhashchange();
+				
 				$scope.name = coffeeLight.loadName();
 				
 				$scope.joinGroup = (group, password) => {
@@ -186,6 +203,7 @@
 				$scope.activateGroup = (id) => {
 					$mdSidenav('left').close();
 					$scope.activeGroupId = id;
+					window.location.hash = id;
 				}
 				
 				$scope.showSetName = function(ev) {
