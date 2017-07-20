@@ -6,10 +6,10 @@ class Channel {
         this.password = options.password || "";
         this.ttl = options.ttl || 60;
         this.type = options.type || Channel.TYPE.COFFEE;
-        this.requestText = options.requestText || "I want coffee!";
+        this.requestText = options.requestText || ("I want " + options.name);
         this.message = options.message || "%u wants %c";
-        this.title = options.title || "Coffee!!!";
-        this.icon = options.icon || "coffee.png";
+        this.title = options.title || options.name;
+        this.icon = options.icon || (this.type + ".png");
 
         this.subscriptions = options.subscriptions || 0;
     }
