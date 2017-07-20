@@ -79,8 +79,21 @@ router.get('/channel', (req, res) => {
 });
 
 router.put('/channel', authenticated((req, res, next) => {
+    if (!req.body.name) {
+        return res.status(400).json({
+            code: 400,
+            error: "Channel name is required"
+        });
+    }
+    
+    let channel = coffeLight.channels.find(c=>c.name === req.body.name);
+    if (channel) {
+        return res.status(400).json({
+            code: 409,
+            error: "Name already taken"
+        });
+    }
 
-    let channel = null;
     coffeLight.createChannel(req.body)
         .then((c) => {
             channel = c;
