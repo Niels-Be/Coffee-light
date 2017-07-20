@@ -144,11 +144,21 @@
 					subscribeToChannel(group.id, password)
 					.then($scope.hideDialog)
 					.then(updateGroupsBinding)
-					.catch(e => {
-						e.json().then(e => $scope.showError(e.error));
-					});
+					.catch(handleFetchError);
 				};
 				
+				function handleFetchError(res) {
+					if(res.status === 400) {
+						return res.json().then(err => $scope.showError(err.error));
+					}
+					else {
+						return res.text().then((text) => {
+							console.error("Unkowen Request error:", text, res);
+							$scope.showError("Unkown error occured");
+						});
+					}
+				}
+
 				$scope.showError =  msg => {
 					console.error(msg);
 					$mdToast.show(
@@ -160,14 +170,18 @@
 				
 				$scope.buttonClicked = (event) => {
 					if(!event.isTrusted) {return;}
-					sendNotification($scope.activeGroupId).catch(e => {
-						e.json().then((e) => {
-							if(e.code == 429) {
-								console.log("Notify Rate Limited");
-							} else {
-								$scope.showError(e.error)
-							}
-						});
+					sendNotification($scope.activeGroupId).catch(res => {
+						if(res.status === 400) {
+							res.json().then((e) => {
+								if(e.code == 429) {
+									console.log("Notify Rate Limited");
+								} else {
+									$scope.showError(e.error)
+								}
+							});
+						} else {
+							handleFetchError(res);
+						}
 					});
 				};
 				
@@ -179,13 +193,13 @@
 									$scope.activeGroup = result.channel;
 								});
 							}
-						});
+						}).catch(handleFetchError);
 					}
 				});
 				
 				$scope.groups = [{"name" : "Loading..."}];
 				function updateGroupsBinding() {
-					getSubscripedChannels().then((groups) => {
+					return getSubscripedChannels().then((groups) => {
 						$scope.$apply(() => {
 							$scope.groups = groups;
 							if(!$scope.activeGroupId && groups.length > 0) {
@@ -197,7 +211,7 @@
 				updateGroupsBinding();
 
 				$scope.leaveGroup = function(groupid) {
-					unsubscribeFromChannel(groupid).then(updateGroupsBinding); 
+					unsubscribeFromChannel(groupid).then(updateGroupsBinding).catch(handleFetchError); 
 				}
 				
 				$scope.activateGroup = (id) => {
@@ -225,7 +239,7 @@
 				};
 
 				$scope.searchGroups = query => {
-					return searchChannels(query).then(r => r.channels);
+					return searchChannels(query).then(r => r.channels).catch(handleFetchError);
 				};
 				
 				function showDialogFactory(id) {
@@ -256,9 +270,7 @@
 					createChannel(options)
 						.then($scope.hideDialog)
 						.then(updateGroupsBinding)
-						.catch(e => {
-							e.json().then(e => $scope.showError(e.error));
-						});
+						.catch(handleFetchError);
 				};
 				
 				$scope.hideDialog = function() {
