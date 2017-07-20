@@ -126,7 +126,21 @@ function signedInFetch() {
 	const args = arguments;
 	return signIn.promise.then(() => {
 		return fetch.apply(undefined, args);
-	});
+	}).then((res)=>{
+        if(res.status == 401) {
+            console.log("Session expired");
+            
+            signIn.promise = new Promise(function(resolve, reject){
+                signIn.resolve = resolve;
+                signIn.reject = reject;
+            });
+            return loginOnServer(auth.currentUser).then(()=>{
+                signIn.resolve();
+                return signedInFetch.apply(this, arguments);
+            });
+        }
+        return res;
+    });
 }
 
 auth.onAuthStateChanged(function (user) {
