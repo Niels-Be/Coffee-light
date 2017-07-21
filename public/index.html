@@ -124,7 +124,7 @@
 				
 				window.onhashchange = () => {
 					var fn = () => {
-						var newId = parseInt(window.location.hash.substr(1));
+						var newId = parseInt(window.location.hash.replace(/[^0-9]/g, ""));
 						if(isNaN(newId)) {
 							return;
 						}
