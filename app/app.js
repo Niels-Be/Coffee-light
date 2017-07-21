@@ -1,5 +1,6 @@
 const EventEmitter = require("events");
 const fs = require('fs');
+const uuid = require('uuid/v4');
 
 const User = require('./User');
 const Channel = require('./Channel');
@@ -26,12 +27,17 @@ class CoffeLight extends EventEmitter {
 
     constructor(config) {
         super();
-        this.config = config;
+        this.config = Object.assign({
+            externalUrl: "http://localhost:8080/",
+            sessionSecret: "ThisIsTheDefaultButItIsRealyRecommenedToChangeThis",
+            storageDb: "db.json",
+            notifyTimeout: 10*1000,
+            shutdownTimeout: 10*1000,
+            firebase: {}
+        }, config);
 
         this.channels = [];
-        this.channelIdCounter = 1;
         this.users = [];
-        this.userIdCounter = 1;
 
         this.load().catch((err) => {
             console.error(err.stack);
@@ -54,7 +60,7 @@ class CoffeLight extends EventEmitter {
         if (!options.name) {
             return Promise.reject(new CodeError(400, "User name is required"));
         }
-        let id = options.id || this.userIdCounter++;
+        let id = options.id || uuid();
 
         let user = new User(id, options);
         console.log("Created new User[%s] %s", user.id, user.name);
@@ -71,7 +77,7 @@ class CoffeLight extends EventEmitter {
             return Promise.reject(new CodeError(400, "Channel name is required"));
         }
 
-        let channel = new Channel(this.channelIdCounter++, options);
+        let channel = new Channel(uuid(), options);
         console.log("Created new Channel[%s] %s", channel.id, channel.name);
         this.channels.push(channel);
         return this.save().then(() => channel);
@@ -80,9 +86,7 @@ class CoffeLight extends EventEmitter {
     save() {
         let obj = {
             channels: this.channels,
-            channelIdCounter: this.channelIdCounter,
             users: this.users,
-            userIdCounter: this.userIdCounter
         };
 
         return new Promise((resolve, reject) => {

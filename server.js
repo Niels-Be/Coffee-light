@@ -10,14 +10,11 @@ const CoffeLight = require('./app/app');
 
 
 
-let config = {
-    externalUrl: "http://localhost:8080",
-    storageDb: "db.json",
-    notifyTimeout: 10 * 1000
-};
-
+let config = {};
 if (fs.existsSync(__dirname + "/config.json")) {
     config = require("./config.json");
+} else {
+    console.error("WARNING: Could not find config.json. Using default values");
 }
 
 global.coffeLight = new CoffeLight(config);
@@ -40,7 +37,7 @@ app.use(bodyParser.urlencoded({
     extended: false
 }));
 app.use(session({
-    secret: 'agv45983r80N§/TsadH(§"Eicon3crb',
+    secret: coffeLight.config.sessionSecret,
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -50,6 +47,10 @@ app.use(session({
 
 // routes
 app.use('/api/v1/', routes);
+
+app.get('/firebase.js', (req, res) => {
+    res.type('text/javascript').send("const firebaseConfig = " + JSON.stringify(coffeLight.config.firebase.web) + ";");
+});
 
 app.use(express.static(__dirname + '/public'));
 
@@ -77,7 +78,7 @@ function shutdownHandler() {
         coffeLight.close().then(() => {
             process.exit(1);
         });
-    }, 10000);
+    }, coffeLight.shutdownTimeout);
 
     server.close(() => {
         console.log("Server closed");

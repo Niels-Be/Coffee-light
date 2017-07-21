@@ -1,13 +1,5 @@
 // Initialize Firebase
-var config = {
-    apiKey: "AIzaSyD9lqJmbdm9l_QmhB4f1j_Kdu3fMYerGkA",
-    authDomain: "coffee-light.firebaseapp.com",
-    databaseURL: "https://coffee-light.firebaseio.com",
-    projectId: "coffee-light",
-    storageBucket: "coffee-light.appspot.com",
-    messagingSenderId: "252605375808"
-};
-firebase.initializeApp(config);
+firebase.initializeApp(firebaseConfig);
 
 
 const messaging = firebase.messaging();

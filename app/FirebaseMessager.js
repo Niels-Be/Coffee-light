@@ -1,9 +1,7 @@
 const firebase = require("firebase-admin");
 
-const serviceAccount = require("../serviceAccountKey.json");
-
 let adminApp = firebase.initializeApp({
-    credential: firebase.credential.cert(serviceAccount),
+    credential: firebase.credential.cert(coffeLight.config.firebase.admin),
     databaseURL: "https://coffee-light.firebaseio.com"
 });
 
