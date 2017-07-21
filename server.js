@@ -78,7 +78,7 @@ function shutdownHandler() {
         coffeLight.close().then(() => {
             process.exit(1);
         });
-    }, coffeLight.shutdownTimeout);
+    }, coffeLight.config.shutdownTimeout);
 
     server.close(() => {
         console.log("Server closed");
