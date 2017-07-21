@@ -107,19 +107,26 @@
 				};
 				
 				window.onhashchange = () => {
-					var fn = () => {
-						var newId = parseInt(window.location.hash.replace(/[^0-9]/g, ""));
-						if(isNaN(newId)) {
-							return;
+					
+					var name = window.location.hash.substr(1);
+					if(name.length == 0) {
+						return;
+					}
+					
+					getChannelByName(name).then((res) => {
+						var fn = () => {
+							$scope.activeGroup   = res.channel.id;
+							$scope.activeGroupId = res.channel.id;
 						}
-						$scope.activeGroupId = newId;
-					}
-					if($scope.$$phase == "$apply") {
-						fn();
-					}
-					else {
-						$scope.$apply(fn);
-					}
+						
+						if($scope.$$phase == "$apply") {
+							fn();
+						}
+						else {
+							$scope.$apply(fn);
+						}
+					});
+					
 				};
 				window.onhashchange();
 				
@@ -171,12 +178,13 @@
 				};
 				
 				$scope.$watch("activeGroupId", (id) => {
-					if(id) {
+					if(id && (!$scope.channel || id != $scope.channel.id) ) {
 						getChannel(id).then(result => {
 							if(result.channel.id == id) { // in case selection changed until request finished
 								$scope.$apply(() => {
 									$scope.activeGroup = result.channel;
 								});
+								window.location.hash = result.channel.name;
 							}
 						}).catch(handleFetchError);
 					}
@@ -197,7 +205,7 @@
 					return getSubscripedChannels().then((groups) => {
 						$scope.$apply(() => {
 							$scope.groups = groups;
-							if(!$scope.activeGroupId && groups.length > 0) {
+							if(!$scope.activeGroupId && groups.length > 0 && !window.location.hash ) {
 								$scope.activeGroupId = groups[0].id;
 							}
 						}); 
@@ -212,7 +220,6 @@
 				$scope.activateGroup = (id) => {
 					$mdSidenav('left').close();
 					$scope.activeGroupId = id;
-					window.location.hash = id;
 				}
 				
 				$scope.showSetName = function(ev) {
