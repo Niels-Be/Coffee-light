@@ -61,7 +61,20 @@ router.get('/channels', (req, res) => {
 });
 
 router.get('/channel', (req, res) => {
-    let channel = coffeLight.getChannel(req.query.channelId);
+    let channel = null;
+    if(req.query.channelId) {
+        channel = coffeLight.getChannel(req.query.channelId);
+    }
+    else if(req.query.channelName) {
+        channel = coffeLight.channels.find(c=>c.name === req.query.channelName);
+    }
+    else {
+        return res.status(400).json({
+            code: 400,
+            error: "`channelId` or `channelName` is required"
+        });
+    }
+
     if (!channel) {
         return res.status(400).json({
             code: 404,
