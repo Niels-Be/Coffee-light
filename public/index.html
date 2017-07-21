@@ -9,32 +9,11 @@
 		.selected {
 			background-color: rgba(255,255,255,.15);
 		}
-		button.coffee {
- 			display: inline-block;
- 			text-align: center;
+		
+		div.button {
+			outline:none;
  			cursor: pointer;
- 			overflow: hidden;
- 			transition: background-color 0.3s linear;
- 		}
- 		button.coffee:after {
- 			content: "";
- 			display: block;
- 			position: absolute;
- 			width: 100%;
- 			height: 100%;
- 			top: 0;
- 			left: 0;
- 			pointer-events: none;
- 			background-image: radial-gradient(circle, black 20%, rgba(0, 0, 0, 0) 19%);
- 			transform: scale(5);
- 			opacity: 0;
- 			transition: transform 1.5s, opacity 1s;
- 		}
- 		button.coffee:active:after {
- 			transform: scale(0);
- 			opacity: .2;
- 			transition: 0s;
- 		}
+		}
 	</style>
 </head>
 
@@ -62,8 +41,6 @@
 		};
 		
 		coffeeLight.setStyle = () => {
-
-			
 			coffeeLight.button = coffeeLight.button || document.getElementById("button");
 			coffeeLight.handle = coffeeLight.handle || document.getElementById("handle");
 			var parent = coffeeLight.button.parentElement;
@@ -76,22 +53,9 @@
 			coffeeLight.button.style.borderWidth = 0.04 * diameter + "px";
 			coffeeLight.button.style.margin = ((parent.offsetHeight - diameter)/2 + "px") + " " + ((parent.offsetWidth - diameter)/2 + "px");
 			
-			var handleHeight = 0.05 * diameter;
-			var handleWidth  = 0.25 * diameter;
-			
-			if(parent.offsetWidth > parent.offsetHeight) {
-				coffeeLight.handle.style.height = handleHeight + "px";
-				coffeeLight.handle.style.width  = handleWidth  + "px";
-				coffeeLight.handle.style.top  = (parent.offsetHeight - handleHeight)/2 + "px";
-				coffeeLight.handle.style.left = (parent.offsetWidth - diameter)/2 - 0.95 * handleWidth + "px";
-				coffeeLight.handle.style.borderRadius = "50% 0% 0% 50%";
-			}
-			else {
-				coffeeLight.handle.style.width  = handleHeight + "px";
-				coffeeLight.handle.style.height = handleWidth  + "px";
-				coffeeLight.handle.style.left = (parent.offsetWidth  - handleHeight)/2 + "px";
-				coffeeLight.handle.style.top  = (parent.offsetHeight + diameter)/2 + "px";
-				coffeeLight.handle.style.borderRadius = "0% 0% 50% 50%";
+			if(self.renderer) {
+				renderer.setSize( diameter,diameter );
+				renderer.render( scene, camera );
 			}
 		}
 	</script>
@@ -105,6 +69,10 @@
 
     <!-- Angular Material Library -->
     <script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.4/angular-material.js"></script>
+	
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/86/three.js"></script>
+	<script src="./styles/kicker.js"></script>
+	<script src="./styles/coffee.js"></script>
 
     <!-- Your application bootstrap  -->
     <script type="text/javascript">
@@ -120,6 +88,21 @@
 
 				window.onload = () => {
 					new ResizeObserver(coffeeLight.setStyle).observe(document.getElementById("buttonContainer"));
+					
+					scene = new THREE.Scene(); // dummy scene
+					camera = new THREE.PerspectiveCamera( 30, 1, 0.1, 1000 );
+					camera.position.z = 12;
+					renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
+					renderer.setPixelRatio(window.devicePixelRatio ? window.devicePixelRatio : 1);
+					renderer.setClearColor("green",0);
+					
+					renderer.render( scene, camera );
+					
+					var b = document.getElementById("button");
+					renderer.setSize( b.offsetWidth, b.offsetHeight );
+					renderer.domElement.style.top = "0px";
+					renderer.domElement.style.position = "absolute";
+					b.insertBefore(renderer.domElement, b.firstElementChild);
 				};
 				
 				window.onhashchange = () => {
@@ -169,8 +152,7 @@
 					);
 				};
 				
-				$scope.buttonClicked = (event) => {
-					if(!event.isTrusted) {return;}
+				$scope.buttonClicked = (event, style) => {
 					sendNotification($scope.activeGroupId).catch(res => {
 						if(res.status === 400) {
 							res.json().then((e) => {
@@ -184,6 +166,7 @@
 							handleFetchError(res);
 						}
 					});
+					style.animate(renderer, event);
 				};
 				
 				$scope.$watch("activeGroupId", (id) => {
@@ -197,6 +180,16 @@
 						}).catch(handleFetchError);
 					}
 				});
+				
+				$scope.$watch("activeGroup.type", (style) => {
+					console.log(coffeeLight.styles, style);
+					if(style && coffeeLight.styles[style]) {
+						scene = coffeeLight.styles[style].getScene();
+						renderer.render(scene, camera);
+						$scope.style = coffeeLight.styles[style];
+					}
+				});
+				
 				
 				$scope.groups = [{"name" : "Loading..."}];
 				function updateGroupsBinding() {
@@ -377,11 +370,10 @@
 					</div>
 				</md-toolbar>
 				
-				<md-content onload="setStyle()" id="buttonContainer" flex layout-padding>
-				    <button ng-click="buttonClicked($event)" class="coffee" id="button" style="outline:none; position: absolute; top:0; left: 0; background: #6F4E37; color: white; border: solid white; border-radius: 50%; width: 70%; height: 70%;">
-						{{activeGroup.requestText}}
-					</button>
-					<div id="handle" style="position: absolute; background-color: white; border-radius: 50% 0% 0% 50%">
+				<md-content  style="overflow: hidden;" id="buttonContainer" flex layout-padding>
+					<div ng-click="buttonClicked($event, style)" id="button" style="position: absolute" class="button">
+						<div style="position: absolute; text-align: center; top: 50%; transform: translateY(-50%);">{{activeGroup.requestText}}</div>
+					</div>
 				</md-content>
 			</md-content>
 				
