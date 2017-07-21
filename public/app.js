@@ -200,18 +200,30 @@ function searchChannels(searchString) {
 
 var channelCache = [];
 
+function _getChannel(by, value) {
+	return signedInFetch(API_PREFIX + '/channel?channel' + by + '=' + value, {
+		"credentials": 'same-origin'
+	})
+	.then((res) => {
+		if (res.status != 200)
+			return Promise.reject(res);
+		return res.json();
+	});
+}
+
 function getChannel(channelId, noCache) {
+	// FIXME: channel cache is never written
     let channel = noCache ? null : channelCache.find(c => c.id === channelId);
     if (channel)
         return Promise.resolve(channel);
-    return signedInFetch(API_PREFIX + '/channel?channelId=' + channelId, {
-            "credentials": 'same-origin'
-        })
-        .then((res) => {
-            if (res.status != 200)
-                return Promise.reject(res);
-            return res.json();
-        });
+	return _getChannel('Id', channelId);
+}
+
+function getChannelByName(channelName, noCache) {
+    let channel = noCache ? null : channelCache.find(c => c.name === channelName);
+    if (channel)
+        return Promise.resolve(channel);
+	return _getChannel('Name', channelName);
 }
 
 function createChannel(options) {
