@@ -24,8 +24,6 @@ const routes = require('./app/routes');
 const webSocketRoutes = require('./app/websocket');
 
 
-require('./app/FirebaseMessager');
-
 const app = express();
 
 // set our port

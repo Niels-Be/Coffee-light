@@ -1,7 +1,10 @@
 const firebase = require("firebase-admin");
 
+
+module.exports = function initFirebase(coffeLight, config) {
+
 let adminApp = firebase.initializeApp({
-    credential: firebase.credential.cert(coffeLight.config.firebase.admin),
+    credential: firebase.credential.cert(config),
     databaseURL: "https://coffee-light.firebaseio.com"
 });
 
@@ -97,3 +100,6 @@ coffeLight.on("unsubscribeFromChannel", (user, channel) => {
 coffeLight.on("close", () => {
     adminApp.delete();
 });
+
+return adminApp;
+};

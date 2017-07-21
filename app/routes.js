@@ -5,14 +5,36 @@ const router = express.Router();
 
 function authenticated(cb, noHandleError) {
     return (req, res, next) => {
-        let type, token;
         if (req.session.userId) {
             req.user = coffeLight.getUser(req.session.userId);
             if (!req.user) {
-                //e.g. load from db or should not hcoffeLighten
+                //e.g. load from db or should not happen
                 console.log("User %d not found", req.session.userId);
             }
             req.session.touch();
+        }
+        let auth = req.get('authorization');
+        if (auth) {
+            let [type, ...token] = auth.split(" ");
+            token = token.join(" ");
+            return coffeLight.firebase.auth().verifyIdToken(token)
+                .then((decodedToken) => {
+                    req.user = coffeLight.getUser(decodedToken.uid);
+                    if (!req.user) {
+                        console.log("User %d not found", decodedToken.uid);
+                        if (!noHandleError)
+                            return res.sendStatus(401);
+                    }
+                    cb(req, res, next);
+                })
+                .catch((err) => {
+                    if(err.code !== "auth/argument-error")
+                        console.log(err.code, err);
+                    if (!noHandleError) {
+                        return res.status(401).send(err.message);
+                    }
+                    cb(req, res, next);
+                });
         }
         if (!req.user && !noHandleError)
             return res.sendStatus(401);
@@ -62,13 +84,11 @@ router.get('/channels', (req, res) => {
 
 router.get('/channel', (req, res) => {
     let channel = null;
-    if(req.query.channelId) {
+    if (req.query.channelId) {
         channel = coffeLight.getChannel(req.query.channelId);
-    }
-    else if(req.query.channelName) {
-        channel = coffeLight.channels.find(c=>c.name === req.query.channelName);
-    }
-    else {
+    } else if (req.query.channelName) {
+        channel = coffeLight.channels.find(c => c.name === req.query.channelName);
+    } else {
         return res.status(400).json({
             code: 400,
             error: "`channelId` or `channelName` is required"
@@ -98,8 +118,8 @@ router.put('/channel', authenticated((req, res, next) => {
             error: "Channel name is required"
         });
     }
-    
-    let channel = coffeLight.channels.find(c=>c.name === req.body.name);
+
+    let channel = coffeLight.channels.find(c => c.name === req.body.name);
     if (channel) {
         return res.status(400).json({
             code: 409,
@@ -184,7 +204,7 @@ router.delete('/channel/subscription', authenticated((req, res, next) => {
 
 
 router.post('/channel/notify', authenticated((req, res, next) => {
-    if(Date.now() - req.user.lastNotify < coffeLight.config.notifyTimeout) {
+    if (Date.now() - req.user.lastNotify < coffeLight.config.notifyTimeout) {
         return res.status(400).json({
             code: 429,
             error: "To many notify requests"

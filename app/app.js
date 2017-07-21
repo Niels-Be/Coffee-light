@@ -4,6 +4,7 @@ const uuid = require('uuid/v4');
 
 const User = require('./User');
 const Channel = require('./Channel');
+const Firebase = require('./FirebaseMessager');
 
 
 
@@ -38,6 +39,8 @@ class CoffeLight extends EventEmitter {
 
         this.channels = [];
         this.users = [];
+
+        this.firebase = Firebase(this, this.config.firebase.admin);
 
         this.load().catch((err) => {
             console.error(err.stack);
