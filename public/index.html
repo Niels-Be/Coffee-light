@@ -323,6 +323,7 @@
 				$sceDelegateProvider.resourceUrlWhitelist(["self", "https://raw.githubusercontent.com/google/**"]);
 				$mdIconProvider
 				.iconSet('navigation', "https://raw.githubusercontent.com/google/material-design-icons/master/sprites/svg-sprite/svg-sprite-navigation.svg", 24)
+				.iconSet('editor',     "https://raw.githubusercontent.com/google/material-design-icons/master/sprites/svg-sprite/svg-sprite-editor.svg", 24)
 				.iconSet('social',     "https://raw.githubusercontent.com/google/material-design-icons/master/sprites/svg-sprite/svg-sprite-social.svg", 24);
 			})
 			.config(function($mdThemingProvider) {
@@ -335,12 +336,16 @@
 
         <section layout="row" flex>
 
-            <md-sidenav 
-				layout="column"
-				class="md-sidenav-left md-whiteframe-z2 md-navigation-drawer" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')" md-whiteframe="4">
-
-                <md-toolbar class="md-theme-indigo">
-                    <h1 class="md-toolbar-tools">Hello {{name}}</h1>
+            <md-sidenav class="md-whiteframe-z2"
+				layout="column" style="overflow: hidden;" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')">
+                
+				<md-toolbar ng-click="showSetName($event)" class="md-theme-indigo" style="cursor: pointer;">
+					<div class="md-toolbar-tools">
+						<h2 flex md-truncate style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Hello {{name}}</h2>
+						<md-button class="md-icon-button" aria-label="Change Name">
+							<md-icon md-svg-icon="editor:ic_mode_edit_24px"></md-icon>
+						</md-button>
+					</div>
                 </md-toolbar>
 					
 					<div layout="column" layout-align="space-between stretch" style="height: 100%;">
@@ -357,10 +362,6 @@
 					  
 					  <md-list>
 						  <md-divider></md-divider>
-						  <md-list-item ng-click="showSetName($event)" role="link">
-							<!--TODO: find icon <md-icon md-svg-icon="social:ic_group_add_24px"></md-icon>-->
-							<p class="md-body-2">Change Name</p>
-						  </md-list-item>
 						  <md-list-item ng-click="showJoinGroup($event)" role="link">
 							<md-icon md-svg-icon="social:ic_group_add_24px"></md-icon>
 							<p class="md-body-2">Join a Group</p>
