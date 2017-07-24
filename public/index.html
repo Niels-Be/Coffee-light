@@ -113,9 +113,13 @@
 						return;
 					}
 					
+					if($scope.activeGroup && $scope.activeGroup.name == name) {
+						return;
+					}
+
 					getChannelByName(name).then((res) => {
 						var fn = () => {
-							$scope.activeGroup   = res.channel.id;
+							$scope.activeGroup   = res.channel;
 							$scope.activeGroupId = res.channel.id;
 						}
 						
@@ -178,11 +182,12 @@
 				};
 				
 				$scope.$watch("activeGroupId", (id) => {
-					if(id && (!$scope.channel || id != $scope.channel.id) ) {
+					if(id && (!$scope.activeGroup || id != $scope.activeGroup.id) ) {
 						getChannel(id).then(result => {
-							if(result.channel.id == id) { // in case selection changed until request finished
+							if(result.channel.id != $scope.activeGroup.id) { // in case selection changed until request finished
 								$scope.$apply(() => {
 									$scope.activeGroup = result.channel;
+									console.log($scope.activeGroup);
 								});
 								window.location.hash = result.channel.name;
 							}
