@@ -225,7 +225,7 @@ router.post('/channel/notify', authenticated((req, res, next) => {
             error: "Not member of that channel"
         });
     }
-    channel.notify(req.user);
+    channel.notify(req.user, req.body.message);
     res.end();
 }));
 

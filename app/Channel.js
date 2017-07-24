@@ -18,12 +18,12 @@ class Channel {
         coffeLight.emit("sendToChannel", this, payload, options);
     }
 
-    notify(user) {
-        console.log("Channel Notify %s", this.name);
+    notify(user, message) {
+        console.log("Channel Notify %s%s", this.name, message ? ' with custom message' : '');
         return this.send({
             notification: {
                 "title": this.title,
-                "body": formatMessage(this.message, this, user),
+                "body": formatMessage(message || this.message, this, user),
                 "icon": this.icon,
                 "click_action": coffeLight.config.externalUrl + "#" + this.name
             },
