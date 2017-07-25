@@ -147,11 +147,15 @@
 					if(res.status === 400) {
 						return res.json().then(err => $scope.showError(err.error));
 					}
-					else {
+					else if(res.text instanceof Function){
 						return res.text().then((text) => {
 							console.error("Unkowen Request error:", text, res);
 							$scope.showError("Unkown error occured");
 						});
+					}
+					else {
+						console.error(res);
+						$scope.showError("Unkown error occured");
 					}
 				}
 
