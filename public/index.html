@@ -137,10 +137,18 @@
 				$scope.name = coffeeLight.loadName();
 				
 				$scope.joinGroup = (group, password) => {
-					subscribeToChannel(group.id, password)
-					.then($scope.hideDialog)
-					.then(updateGroupsBinding)
-					.catch(handleFetchError);
+					let promiseGroupId;
+					if(group == null){
+						promiseGroupId = getChannelByName($scope.searchText)
+							.then(res => res.channel.id);
+					}
+					else {
+						promiseGroupId = Promise.resolve(group.id);
+					}
+					promiseGroupId.then(groupId => subscribeToChannel(groupId, password))
+						.then($scope.hideDialog)
+						.then(updateGroupsBinding)
+						.catch(handleFetchError);
 				};
 				
 				function handleFetchError(res) {
