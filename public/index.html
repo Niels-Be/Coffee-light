@@ -188,7 +188,7 @@
 				$scope.$watch("activeGroupId", (id) => {
 					if(id && (!$scope.activeGroup || id != $scope.activeGroup.id) ) {
 						getChannel(id).then(result => {
-							if(result.channel.id != $scope.activeGroup.id) { // in case selection changed until request finished
+							if(!$scope.activeGroup || result.channel.id != $scope.activeGroup.id) { // in case selection changed until request finished
 								$scope.$apply(() => {
 									$scope.activeGroup = result.channel;
 									console.log($scope.activeGroup);
