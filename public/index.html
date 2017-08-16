@@ -129,8 +129,21 @@
 						else {
 							$scope.$apply(fn);
 						}
-					});
-					
+					})
+          .catch((e) => {
+            if(e instanceof Response) {
+              e.json().then((body) => {
+                var msg = body.error || "Unkown error"
+                $scope.showError(msg);
+                $scope.activeGroup = {requestText: msg};
+              })
+              .catch((ex) => {$scope.showError("Unkown error");});
+            }
+            else {
+              $scope.showError("Unkown error");
+            }
+          });
+
 				};
 				window.onhashchange();
 				
