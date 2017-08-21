@@ -31,7 +31,7 @@ function makeNotification(data) {
 }
 
 self.addEventListener('install', function () {
-  console.log("Worker instelled");
+  console.log("Worker installed");
   self.skipWaiting();
 });
 self.addEventListener('activate', event => {

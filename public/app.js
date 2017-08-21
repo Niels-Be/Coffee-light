@@ -12,6 +12,30 @@ const workerPromise = navigator.serviceWorker.register("firebase-messaging-sw.js
     })
     .catch(console.error);
 
+//Delete old service worker
+navigator.serviceWorker.getRegistrations()
+    .then((registrations) => {
+        registrations.forEach((reg) => {
+            if (reg.scope.endsWith("/firebase-cloud-messaging-push-scope")) {
+                console.log("unregister old service worker");
+                reg.unregister();
+            }
+        });
+    });
+
+function sendToWorker(data) {
+    return workerPromise.then((reg) => {
+        if (reg.active == null) {
+            console.log("Worker not jet active");
+            return new Promise((resolve, reject) => {
+                setTimeout(resolve, 500);
+            }).then(() => sendToWorker(data));
+        } else {
+            reg.active.postMessage(data);
+        }
+    });
+}
+
 
 messaging.onTokenRefresh(function () {
     messaging.getToken()
@@ -40,11 +64,9 @@ messaging.onTokenRefresh(function () {
 //   `messaging.setBackgroundMessageHandler` handler.
 messaging.onMessage(function (payload) {
     console.log("Message received. ", payload);
-    workerPromise.then((reg) => {
-        reg.active.postMessage({
-            type: "notify",
-            data: payload.data
-        });
+    sendToWorker({
+        type: "notify",
+        data: payload.data
     });
 });
 
@@ -95,7 +117,7 @@ function deleteToken() {
                 });
         })
         .catch(function (err) {
-            console.log('Error retrieving Instance ID token. ', err);
+            console.log('Error retrieving Instance IDsetUser token. ', err);
         });
 }
 
@@ -157,13 +179,10 @@ auth.onAuthStateChanged(function (user) {
         }
 
         console.log("Signed in ", user);
-        workerPromise.then((reg) => {
-            reg.active.postMessage({
-                type: "setUser",
-                userId: user.uid
-            });
+        sendToWorker({
+            type: "setUser",
+            userId: user.uid
         });
-
 
         loginOnServer(user).catch((err) => {
             console.log("Unable to login on server", err);
