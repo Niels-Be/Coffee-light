@@ -21,16 +21,15 @@ class Channel {
     notify(user, message) {
         console.log("Channel Notify %s%s", this.name, message ? ' with custom message' : '');
         return this.send({
-            notification: {
-                "title": this.title,
-                "body": formatMessage(message || this.message, this, user),
-                "icon": this.icon,
-                "click_action": coffeLight.config.externalUrl + "#" + this.name
-            },
             data: {
-                "name": user.name,
+                "name": "" + user.name,
                 "channel": "" + this.id,
-                "ts": "" + Date.now()
+                "channel_name": "" + this.name,
+                "ts": "" + Date.now(),
+                "notification_title": this.title,
+                "notification_body": formatMessage(message || this.message, this, user),
+                "notification_icon": this.icon,
+                "notification_click_action": coffeLight.config.externalUrl + "#" + this.name
             }
         }, {
             timeToLive: this.ttl

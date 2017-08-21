@@ -5,6 +5,12 @@ firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 const auth = firebase.auth();
 
+const workerPromise = navigator.serviceWorker.register("firebase-messaging-sw.js")
+    .then((reg) => {
+        messaging.useServiceWorker(reg);
+    })
+    .catch(console.error);
+
 
 messaging.onTokenRefresh(function () {
     messaging.getToken()
@@ -34,15 +40,31 @@ messaging.onTokenRefresh(function () {
 messaging.onMessage(function (payload) {
     console.log("Message received. ", payload);
 
-    if (payload.data.name !== coffeeLight.loadName()) {
-        var notification = new Notification(payload.notification.title, payload.notification);
-    }
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+        if (registrations.length > 0 && registrations[0].active && registrations[0].active.state === "activated") {
+            registrations[0].active.postMessage({
+                type: "notify",
+                data: payload.data
+            });
+        } else {
+            console.log("No service worker found, fallback to direct message");
+            if (payload.data.name !== coffeeLight.loadName()) {
+                var notification = new Notification(payload.data.notification_title, {
+                    body: payload.data.notification_body,
+                    icon: payload.data.notification_icon,
+                    click_action: payload.data.notification_click_action
+                });
+            }
+        }
+    });
 });
 
 function getToken() {
     // Get Instance ID token. Initially this makes a network call, once retrieved
     // subsequent calls to getToken will return from cache.
-    return messaging.getToken()
+    return workerPromise.then(() => {
+            return messaging.getToken()
+        })
         .then(function (currentToken) {
             if (currentToken) {
                 console.log("Got Messaging token");
@@ -109,24 +131,24 @@ function loginOnServer(user) {
 
 auth.signInAnonymously().catch(console.error);
 const signIn = {};
-signIn.promise = new Promise(function(resolve, reject){
-	signIn.resolve = resolve;
-	signIn.reject = reject;
+signIn.promise = new Promise(function (resolve, reject) {
+    signIn.resolve = resolve;
+    signIn.reject = reject;
 });
 
 function signedInFetch() {
-	const args = arguments;
-	return signIn.promise.then(() => {
-		return fetch.apply(undefined, args);
-	}).then((res)=>{
-        if(res.status == 401) {
+    const args = arguments;
+    return signIn.promise.then(() => {
+        return fetch.apply(undefined, args);
+    }).then((res) => {
+        if (res.status == 401) {
             console.log("Session expired");
-            
-            signIn.promise = new Promise(function(resolve, reject){
+
+            signIn.promise = new Promise(function (resolve, reject) {
                 signIn.resolve = resolve;
                 signIn.reject = reject;
             });
-            return loginOnServer(auth.currentUser).then(()=>{
+            return loginOnServer(auth.currentUser).then(() => {
                 signIn.resolve();
                 return signedInFetch.apply(this, arguments);
             });
@@ -201,29 +223,29 @@ function searchChannels(searchString) {
 var channelCache = [];
 
 function _getChannel(by, value) {
-	return signedInFetch(API_PREFIX + '/channel?channel' + by + '=' + value, {
-		"credentials": 'same-origin'
-	})
-	.then((res) => {
-		if (res.status != 200)
-			return Promise.reject(res);
-		return res.json();
-	});
+    return signedInFetch(API_PREFIX + '/channel?channel' + by + '=' + value, {
+            "credentials": 'same-origin'
+        })
+        .then((res) => {
+            if (res.status != 200)
+                return Promise.reject(res);
+            return res.json();
+        });
 }
 
 function getChannel(channelId, noCache) {
-	// FIXME: channel cache is never written
+    // FIXME: channel cache is never written
     let channel = noCache ? null : channelCache.find(c => c.id === channelId);
     if (channel)
         return Promise.resolve(channel);
-	return _getChannel('Id', channelId);
+    return _getChannel('Id', channelId);
 }
 
 function getChannelByName(channelName, noCache) {
     let channel = noCache ? null : channelCache.find(c => c.name === channelName);
     if (channel)
         return Promise.resolve(channel);
-	return _getChannel('Name', channelName);
+    return _getChannel('Name', channelName);
 }
 
 function createChannel(options) {
