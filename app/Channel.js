@@ -23,6 +23,7 @@ class Channel {
         return this.send({
             data: {
                 "name": "" + user.name,
+                "user_id": "" + user.id,
                 "channel": "" + this.id,
                 "channel_name": "" + this.name,
                 "ts": "" + Date.now(),

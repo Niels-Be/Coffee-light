@@ -7,12 +7,15 @@ firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
 let notifications = {};
+let userId = null;
 
 self.addEventListener('message', function (msg) {
-  console.log(msg);
   if (msg.data.type === "notify") {
-    if(!notifications[msg.data.data.ts])
+    if(!notifications[msg.data.data.ts] && msg.data.data.user_id !== userId)
       makeNotification(msg.data.data);
+  } else if(msg.data.type === "setUser") {
+    console.log("Set userId to" + msg.data.userId);
+    userId = msg.data.userId;
   }
 });
 

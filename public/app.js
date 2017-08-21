@@ -8,6 +8,7 @@ const auth = firebase.auth();
 const workerPromise = navigator.serviceWorker.register("firebase-messaging-sw.js")
     .then((reg) => {
         messaging.useServiceWorker(reg);
+        return reg;
     })
     .catch(console.error);
 
@@ -39,23 +40,11 @@ messaging.onTokenRefresh(function () {
 //   `messaging.setBackgroundMessageHandler` handler.
 messaging.onMessage(function (payload) {
     console.log("Message received. ", payload);
-
-    navigator.serviceWorker.getRegistrations().then((registrations) => {
-        if (registrations.length > 0 && registrations[0].active && registrations[0].active.state === "activated") {
-            registrations[0].active.postMessage({
-                type: "notify",
-                data: payload.data
-            });
-        } else {
-            console.log("No service worker found, fallback to direct message");
-            if (payload.data.name !== coffeeLight.loadName()) {
-                var notification = new Notification(payload.data.notification_title, {
-                    body: payload.data.notification_body,
-                    icon: payload.data.notification_icon,
-                    click_action: payload.data.notification_click_action
-                });
-            }
-        }
+    workerPromise.then((reg) => {
+        reg.active.postMessage({
+            type: "notify",
+            data: payload.data
+        });
     });
 });
 
@@ -168,6 +157,13 @@ auth.onAuthStateChanged(function (user) {
         }
 
         console.log("Signed in ", user);
+        workerPromise.then((reg) => {
+            reg.active.postMessage({
+                type: "setUser",
+                userId: user.uid
+            });
+        });
+
 
         loginOnServer(user).catch((err) => {
             console.log("Unable to login on server", err);
