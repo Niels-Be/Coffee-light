@@ -6,16 +6,20 @@ firebase.initializeApp(firebaseConfig);
 
 const messaging = firebase.messaging();
 
+let notifications = {};
+
 self.addEventListener('message', function (msg) {
   console.log(msg);
   if (msg.data.type === "notify") {
-    makeNotification(msg.data.data);
+    if(!notifications[msg.data.data.ts])
+      makeNotification(msg.data.data);
   }
 });
 
 function makeNotification(data) {
   console.log('[firebase-messaging-sw.js] Received background message ', data);
-
+  notifications[data.ts] = true;
+  
   return self.registration.showNotification(data.notification_title, {
     body: data.notification_body,
     icon: data.notification_icon,
@@ -38,6 +42,7 @@ self.addEventListener("notificationclick", function (event) {
   console.log("notfification clicked", event);
 
   event.notification.close();
+  delete notifications[event.notification.data.ts];
 
   event.waitUntil(
     self.clients.claim().then(() => {
