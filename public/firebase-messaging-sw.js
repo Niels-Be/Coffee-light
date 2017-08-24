@@ -8,6 +8,7 @@ const messaging = firebase.messaging();
 
 let notifications = {};
 let userId = null;
+let lastUpdateCheck = 0;
 
 self.addEventListener('message', function (msg) {
   if (msg.data.type === "notify") {
@@ -20,8 +21,14 @@ self.addEventListener('message', function (msg) {
 });
 
 function makeNotification(data) {
-  console.log('[firebase-messaging-sw.js] Received background message ', data);
+  console.log('Received background message ', data);
   notifications[data.ts] = true;
+
+  if(lastUpdateCheck + 60*60*1000 < Date.now()) {
+    lastUpdateCheck = Date.now();
+    console.log("Check for updates");
+    self.registration.update();  
+  }
   
   return self.registration.showNotification(data.notification_title, {
     body: data.notification_body,
@@ -33,6 +40,7 @@ function makeNotification(data) {
 self.addEventListener('install', function () {
   console.log("Worker installed");
   self.skipWaiting();
+  lastUpdateCheck = Date.now();
 });
 self.addEventListener('activate', event => {
   console.log("Worker actived");
