@@ -181,7 +181,8 @@ auth.onAuthStateChanged(function (user) {
         console.log("Signed in ", user);
         sendToWorker({
             type: "setUser",
-            userId: user.uid
+            userId: user.uid,
+            userName: user.displayName
         });
 
         loginOnServer(user).catch((err) => {
@@ -210,6 +211,12 @@ function changeName(name) {
         body: JSON.stringify({
             name: name
         })
+    });
+
+    sendToWorker({
+        type: "setUser",
+        userId: auth.currentUser.uid,
+        userName: name
     });
 
     return Promise.all([authUpdate, serverUpdate]);

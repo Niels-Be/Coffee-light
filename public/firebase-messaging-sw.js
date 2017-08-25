@@ -1,28 +1,43 @@
 importScripts('https://www.gstatic.com/firebasejs/3.9.0/firebase-app.js');
 importScripts('https://www.gstatic.com/firebasejs/3.9.0/firebase-messaging.js');
 importScripts('./firebase.js');
+importScripts('./localforage.min.js');
 
+localforage.config()
 firebase.initializeApp(firebaseConfig);
 
 const messaging = firebase.messaging();
 
 let notifications = {};
 let userId = null;
+let userName = null;
 let lastUpdateCheck = 0;
+
+localforage.getItem("userId").then((uid) => {
+  userId = uid;
+});
+
+localforage.getItem("userName").then((name) => {
+  userName = name;
+});
+
 
 self.addEventListener('message', function (msg) {
   if (msg.data.type === "notify") {
     if(!notifications[msg.data.data.ts] && msg.data.data.user_id !== userId)
       makeNotification(msg.data.data);
   } else if(msg.data.type === "setUser") {
-    console.log("Set userId to" + msg.data.userId);
+    console.log("Set user to " + msg.data.userName);
     userId = msg.data.userId;
+    userName = msg.data.userName;
+    localforage.setItem("userId", userId);
+    localforage.setItem("userName", userName);
   }
-});
+}); 
 
 function makeNotification(data) {
   console.log('Received background message ', data);
-  notifications[data.ts] = true;
+  notifications[data.ts] = true;1
 
   if(lastUpdateCheck + 60*60*1000 < Date.now()) {
     lastUpdateCheck = Date.now();
