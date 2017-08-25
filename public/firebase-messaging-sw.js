@@ -24,8 +24,13 @@ localforage.getItem("userName").then((name) => {
 
 self.addEventListener('message', function (msg) {
   if (msg.data.type === "notify") {
-    if(!notifications[msg.data.data.ts] && msg.data.data.user_id !== userId)
+    if(
+      !notifications[msg.data.data.ts] && // avoid duplicates
+      msg.data.data.user_id !== userId && // hide own messages
+      msg.data.data.ts < Date.now() - 60*1000  // hide old messages
+    ) {
       makeNotification(msg.data.data);
+    }
   } else if(msg.data.type === "setUser") {
     console.log("Set user to " + msg.data.userName);
     userId = msg.data.userId;
