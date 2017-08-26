@@ -27,6 +27,7 @@ self.addEventListener('message', function (msg) {
     if(
       !notifications[msg.data.data.ts] && // avoid duplicates
       msg.data.data.user_id !== userId && // hide own messages
+      msg.data.data.user !== userName && // hide messages with same name
       msg.data.data.ts < Date.now() - 60*1000  // hide old messages
     ) {
       makeNotification(msg.data.data);
