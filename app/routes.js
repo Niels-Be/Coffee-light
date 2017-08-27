@@ -28,7 +28,7 @@ function authenticated(cb, noHandleError) {
                     cb(req, res, next);
                 })
                 .catch((err) => {
-                    if(err.code !== "auth/argument-error")
+                    if (err.code !== "auth/argument-error")
                         console.log(err.code, err);
                     if (!noHandleError) {
                         return res.status(401).send(err.message);
@@ -225,8 +225,33 @@ router.post('/channel/notify', authenticated((req, res, next) => {
             error: "Not member of that channel"
         });
     }
-    channel.notify(req.user, req.body.message);
-    res.end();
+    channel.notify(req.user, req.body.message).then(() => {
+        res.end();
+    });
+}));
+
+router.post('/channel/replay', authenticated((req, res, next) => {
+    let channel = coffeLight.getChannel(req.body.channelId);
+    if (!channel) {
+        return res.status(400).json({
+            code: 404,
+            error: "Channel not found"
+        });
+    }
+    if (!req.user.subscriptions.has(channel.id)) {
+        return res.status(400).json({
+            code: 403,
+            error: "Not member of that channel"
+        });
+    }
+    channel.replay(req.user, req.body.messageId, req.body.action).then(() => {
+        res.end();
+    }).catch(() => {
+        res.status(400).json({
+            code: 404,
+            error: "Message not found"
+        });
+    });
 }));
 
 router.get('/subscriptions', authenticated((req, res, next) => {

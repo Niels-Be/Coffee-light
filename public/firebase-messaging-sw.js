@@ -24,37 +24,77 @@ localforage.getItem("userName").then((name) => {
 
 self.addEventListener('message', function (msg) {
   if (msg.data.type === "notify") {
-    if(
-      !notifications[msg.data.data.ts] && // avoid duplicates
-      msg.data.data.user_id !== userId && // hide own messages
-      msg.data.data.user !== userName && // hide messages with same name
-      msg.data.data.ts < Date.now() - 60*1000  // hide old messages
-    ) {
-      makeNotification(msg.data.data);
-    }
-  } else if(msg.data.type === "setUser") {
+    handleIncommingNotification(msg.data.data);
+  } else if (msg.data.type === "setUser") {
     console.log("Set user to " + msg.data.userName);
     userId = msg.data.userId;
     userName = msg.data.userName;
     localforage.setItem("userId", userId);
     localforage.setItem("userName", userName);
   }
-}); 
+});
+
+function handleIncommingNotification(data) {
+  data.ts = parseInt(data.ts) || 0;
+  data.notification_ttl = parseInt(data.notification_ttl) || 60;
+  if (data.type == "replay" || // always show replays
+    !notifications[data.messageId] && // avoid duplicates
+    data.user_id !== userId && // hide own messages
+    data.name !== userName && // hide messages with same name
+    data.ts > Date.now() - data.notification_ttl * 1000 // hide old messages
+  ) {
+    return makeNotification(data);
+  } else {
+    console.log("supress message", data);
+    return Promise.resolve();
+  }
+}
 
 function makeNotification(data) {
   console.log('Received background message ', data);
-  notifications[data.ts] = true;1
+  notifications[data.messageId] = true;
 
-  if(lastUpdateCheck + 60*60*1000 < Date.now()) {
+  if (lastUpdateCheck + 60 * 60 * 1000 < Date.now()) {
     lastUpdateCheck = Date.now();
     console.log("Check for updates");
-    self.registration.update();  
+    self.registration.update();
   }
-  
+
+  if (data.type === "replay") {
+    if (data.action !== "accept") return;
+    return self.registration.getNotifications({
+      tag: data.messageId
+    }).then((notifies) => {
+      let notify = notifies.find((n) => n.data.messageId === data.messageId);
+      if (!notify || notify.data.closed) return;
+      notify.close();
+      let data2 = notify.data;
+      data2.acceptedUsers.push(data.name);
+      return showNotification(data2, true);
+    });
+  } else {
+    data.acceptedUsers = [];
+    return showNotification(data);
+  }
+}
+
+function showNotification(data, silent) {
   return self.registration.showNotification(data.notification_title, {
-    body: data.notification_body,
+    body: data.notification_body + (data.acceptedUsers.length > 0 ? "\nAccepted: " + data.acceptedUsers.join(", ") : ""),
     icon: data.notification_icon,
-    data: data
+    tag: data.messageId,
+    data: data,
+    //vibrate: !silent,
+    silent: !!silent,
+    actions: data.notification_enable_replay === "true" ? [{
+        action: 'accept',
+        title: '👍 me too'
+      },
+      {
+        action: 'decline',
+        title: '⤻ nope'
+      }
+    ] : undefined
   });
 }
 
@@ -68,28 +108,54 @@ self.addEventListener('activate', event => {
   event.waitUntil(self.clients.claim());
 });
 
-messaging.setBackgroundMessageHandler((payload) => makeNotification(payload.data));
+messaging.setBackgroundMessageHandler((payload) => handleIncommingNotification(payload.data));
 
 self.addEventListener("notificationclick", function (event) {
   console.log("notfification clicked", event);
 
   event.notification.close();
-  delete notifications[event.notification.data.ts];
+  event.notification.data.closed = true;
+  delete notifications[event.notification.data.messageId];
 
-  event.waitUntil(
-    self.clients.claim().then(() => {
-      return self.clients.matchAll({
-        type: "window"
-      })
-    })
-    .then(function (clientList) {
-      console.log(clientList);
-      if (clientList.length > 0) {
-        return clientList[0].focus()
-          .then(() => clientList[0].navigate("./#" + event.notification.data.channel_name))
-      }
-      if (self.clients.openWindow)
-        return self.clients.openWindow("./#" + event.notification.data.channel_name);
-    }).catch(console.error)
-  );
+  switch (event.action) {
+    case "accept":
+    case "decline":
+      event.waitUntil(
+        fetch('./api/v1/channel/replay', {
+          "credentials": 'same-origin',
+          "method": "POST",
+          "headers": {
+            "content-type": "application/json",
+            "cache-control": "no-cache"
+          },
+          "body": JSON.stringify({
+            "channelId": event.notification.data.channel,
+            "messageId": event.notification.data.messageId,
+            "action": event.action,
+          })
+        }).then((res) => {
+          if (res && res.status != 200) console.log(res.json());
+        }).catch(console.error)
+      );
+      break;
+    default:
+      event.waitUntil(
+        self.clients.claim().then(() => {
+          return self.clients.matchAll({
+            type: "window"
+          })
+        })
+        .then(function (clientList) {
+          console.log(clientList);
+          if (clientList.length > 0) {
+            return clientList[0].focus()
+              .then(() => clientList[0].navigate("./#" + event.notification.data.channel_name))
+          }
+          if (self.clients.openWindow)
+            return self.clients.openWindow("./#" + event.notification.data.channel_name);
+        }).catch(console.error)
+      );
+
+  }
+
 });
