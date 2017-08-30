@@ -45,7 +45,7 @@ function handleIncommingNotification(data) {
   ) {
     return makeNotification(data);
   } else {
-    console.log("supress message", data);
+    console.log("supress message\nDuplicate: %s\nUserId: %s\nUserName: %s\nTTL: %s\n", !notifications[data.messageId], data.user_id !== userId, data.name !== userName, data.ts > Date.now() - data.notification_ttl * 1000, data);
     return Promise.resolve();
   }
 }
