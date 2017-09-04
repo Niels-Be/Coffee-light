@@ -77,11 +77,11 @@ function processReplay(data) {
       return;
     }
     orgData.acceptedUsers.push(data.name);
-    return showNotification(orgData, true);
+    return showNotification(orgData, true, !notify);
   });
 }
 
-function showNotification(data, silent) {
+function showNotification(data, silent, hideButtons) {
   setTimeout(cleanupOldMessages, data.notification_ttl * 1000 + 1);
   return self.registration.showNotification(data.notification_title, {
     body: data.notification_body + (data.acceptedUsers.length > 0 ? "\nAccepted: " + data.acceptedUsers.join(", ") : ""),
@@ -90,7 +90,7 @@ function showNotification(data, silent) {
     data: data,
     //vibrate: !silent,
     silent: !!silent,
-    actions: (data.notification_enable_replay === "true" && !silent) ? [{
+    actions: (data.notification_enable_replay === "true" && !hideButtons) ? [{
         action: 'accept',
         title: '👍 me too'
       },
