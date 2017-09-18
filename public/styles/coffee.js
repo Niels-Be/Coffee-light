@@ -10,7 +10,7 @@ coffeeLight.styles.coffee = {
 		if(coffeeLight.styles.coffee._scene == null) {
 			var oLoader = new THREE.ObjectLoader();
 			var scene = oLoader.parse(coffeeLight.styles.coffee._data);
-			scene.position.z = 8;
+			scene.position.z = 16;
 			coffeeLight.styles.coffee._scene = scene;
 		}
 		
