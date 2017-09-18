@@ -5,7 +5,8 @@ coffeeLight.styles.kicker = {
 	
 	_object: null,
 	_scene: null,
-	
+	fontColor: "white",
+
 	getScene: function() {
 		if(coffeeLight.styles.kicker._object == null) {
 			var jLoader = new THREE.JSONLoader();

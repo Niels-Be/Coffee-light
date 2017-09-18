@@ -74,6 +74,7 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/86/three.js"></script>
 	<script src="./styles/kicker.js"></script>
 	<script src="./styles/coffee.js"></script>
+	<script src="./styles/lunch.js"></script>
 
     <!-- Your application bootstrap  -->
     <script type="text/javascript">
@@ -225,11 +226,13 @@
 					console.log(coffeeLight.styles, style);
 					if(style && coffeeLight.styles[style]) {
 						scene = coffeeLight.styles[style].getScene();
+						document.getElementById("button").style.color = coffeeLight.styles[style].fontColor;
 						renderer.render(scene, camera);
 						$scope.style = coffeeLight.styles[style];
 					}
 					else if("DUMMY_SCENE" in window) {
 						scene = DUMMY_SCENE;
+						document.getElementById("button").style.color = "white";
 						renderer.render(scene, camera);
 					}
 				});

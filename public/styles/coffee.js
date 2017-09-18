@@ -4,7 +4,8 @@ coffeeLight.styles = coffeeLight.styles || {};
 coffeeLight.styles.coffee = {
 	
 	_scene: null,
-	
+	fontColor: "white",
+
 	getScene: function() {
 		if(coffeeLight.styles.coffee._scene == null) {
 			var oLoader = new THREE.ObjectLoader();
