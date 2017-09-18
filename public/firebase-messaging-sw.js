@@ -118,6 +118,7 @@ self.addEventListener("notificationclick", function (event) {
   console.log("notfification clicked", event);
 
   event.notification.close();
+  event.notification.data = event.notification.data || {};
   event.notification.data.closed = true;
   (notifications[event.notification.data.messageId] || {}).closed = true;
 
