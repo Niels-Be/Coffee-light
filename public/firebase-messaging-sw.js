@@ -118,8 +118,6 @@ self.addEventListener("notificationclick", function (event) {
   console.log("notfification clicked", event);
 
   event.notification.close();
-  event.notification.data = event.notification.data || {};
-  event.notification.data.closed = true;
   (notifications[event.notification.data.messageId] || {}).closed = true;
 
   switch (event.action) {
@@ -185,7 +183,6 @@ function cleanupOldMessages() {
     notifies.
     filter(n => n.data.ts + n.data.notification_ttl * 1000 < Date.now()).
     forEach((n) => {
-      n.data.closed = true;
       (notifications[n.data.messageId] || {}).closed = true;
       n.close();
     });
