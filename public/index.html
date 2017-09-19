@@ -76,6 +76,8 @@
 	<script src="./styles/coffee.js"></script>
 	<script src="./styles/lunch.js"></script>
 
+	<script src="./GroupDialog.js"></script>
+
     <!-- Your application bootstrap  -->
     <script type="text/javascript">
         angular
@@ -162,12 +164,12 @@
 						promiseGroupId = Promise.resolve(group.id);
 					}
 					promiseGroupId.then(groupId => subscribeToChannel(groupId, password))
-						.then($scope.hideDialog)
-						.then(updateGroupsBinding)
-						.catch(handleFetchError);
+						.then($scope.hideDialog.bind($scope))
+						.then($scope.updateGroupsBinding.bind($scope))
+						.catch($scope.handleFetchError.bind($scope));
 				};
 				
-				function handleFetchError(res) {
+				$scope.handleFetchError = (res) => {
 					if(res.status === 400) {
 						return res.json().then(err => $scope.showError(err.error));
 					}
@@ -203,23 +205,27 @@
 								}
 							});
 						} else {
-							handleFetchError(res);
+							$scope.handleFetchError(res);
 						}
 					});
 					style.animate(renderer, event);
 				};
 				
+				function loadGroupData(id) {
+					getChannel(id).then(result => {
+						if(!$scope.activeGroup || result.channel.id != $scope.activeGroup.id) { // in case selection changed until request finished
+							$scope.$apply(() => {
+								$scope.activeGroup = result.channel;
+								console.log($scope.activeGroup);
+							});
+							window.location.hash = result.channel.name;
+						}
+					}).catch($scope.handleFetchError.bind($scope));
+				}
+        
 				$scope.$watch("activeGroupId", (id) => {
 					if(id && (!$scope.activeGroup || id != $scope.activeGroup.id) ) {
-						getChannel(id).then(result => {
-							if(!$scope.activeGroup || result.channel.id != $scope.activeGroup.id) { // in case selection changed until request finished
-								$scope.$apply(() => {
-									$scope.activeGroup = result.channel;
-									console.log($scope.activeGroup);
-								});
-								window.location.hash = result.channel.name;
-							}
-						}).catch(handleFetchError);
+						loadGroupData(id);
 					}
 				});
 				
@@ -240,7 +246,7 @@
 				
 				
 				$scope.groups = [{"name" : "Loading..."}];
-				function updateGroupsBinding() {
+				$scope.updateGroupsBinding = function() {
 					return getSubscripedChannels().then((groups) => {
 						$scope.$apply(() => {
 							$scope.groups = groups;
@@ -250,15 +256,18 @@
 						}); 
 					});
 				}
-				updateGroupsBinding();
+				$scope.updateGroupsBinding();
 
 				$scope.leaveGroup = function(groupid) {
-					unsubscribeFromChannel(groupid).then(updateGroupsBinding).catch(handleFetchError); 
+					unsubscribeFromChannel(groupid).then(() => $scope.updateGroupsBinding()).catch($scope.handleFetchError.bind($scope)); 
 				}
 				
-				$scope.activateGroup = (id) => {
+				$scope.activateGroup = (id, forceRefresh) => {
 					$mdSidenav('left').close();
 					$scope.activeGroupId = id;
+					if(forceRefresh) {
+						loadGroupData(id);
+					}
 				}
 				
 				$scope.showSetName = function(ev) {
@@ -280,7 +289,7 @@
 				};
 
 				$scope.searchGroups = query => {
-					return searchChannels(query).then(r => r.channels).catch(handleFetchError);
+					return searchChannels(query).then(r => r.channels).catch($scope.handleFetchError.bind($scope));
 				};
 				
 				function showDialogFactory(id) {
@@ -295,24 +304,9 @@
 					};
 				}
 				
-				$scope.createGroup = {};
 				$scope.showJoinGroup = showDialogFactory("dialogJoin");
-				$scope.showCreateGroup = showDialogFactory("dialogCreate");
-				$scope.createGroupSubmit = () => {
-					var options = {
-						name: $scope.createGroup.name,
-						password: $scope.createGroup.password || undefined,
-						type: $scope.createGroup.type || undefined,
-						message: $scope.createGroup.message || undefined
-					};
-					$scope.createGroup = {};
-					
-					console.log("Create Channel", options);
-					createChannel(options)
-						.then($scope.hideDialog)
-						.then(updateGroupsBinding)
-						.catch(handleFetchError);
-				};
+				$scope.showCreateGroup = GroupDialogFactory.bind(GroupDialogFactory, $scope, $mdDialog, "create", document.getElementById("main"));
+				$scope.showEditDialog  = GroupDialogFactory.bind(GroupDialogFactory, $scope, $mdDialog, "edit"  , document.getElementById("main"));
 				
 				$scope.hideDialog = function() {
 					$mdDialog.hide();
@@ -366,7 +360,7 @@
 
     </script>
 
-    <div ng-controller="AppCtrl" layout="column" style="height:100%;" ng-cloak>
+    <div id="main" ng-controller="AppCtrl" layout="column" style="height:100%;" ng-cloak>
 
         <section layout="row" flex>
 
@@ -415,6 +409,10 @@
 						<md-button class="md-icon-button" ng-click="toggleLeft()" hide-gt-md aria-label="Menu">
 							<md-icon md-svg-icon="navigation:ic_menu_24px" aria-label="Menu"></md-icon>
 						</md-button>
+						<h2 flex md-truncate style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{activeGroup.name}}</h2>
+						<md-button class="md-icon-button" ng-click="showEditDialog($event)" aria-label="Edit Group">
+							<md-icon md-svg-icon="editor:ic_mode_edit_24px"></md-icon>
+						</md-button>
 					</div>
 				</md-toolbar>
 				
@@ -426,42 +424,6 @@
 			</md-content>
 				
         </section>
-		
-		<div style="visibility: hidden">
-			<div class="md-dialog-container" id="dialogCreate">
-			  <md-dialog layout-padding="">
-				  <form name="createGroup" ng-submit="createGroupSubmit()">
-					<h2>Create Group</h2>
-					<div class="flex flex-col">
-						<md-input-container class="md-block">
-							<label>Name</label>
-							<input type="text" required ng-model="createGroup.name">
-						</md-input-container>
-						<md-input-container class="md-block">
-							<label>Password</label>
-							<input type="password" ng-model="createGroup.password">
-						</md-input-container>
-						<md-input-container class="md-block">
-							<label>Type</label>
-							<md-select ng-model="createGroup.type">
-								<md-option value="coffee" selected>Coffee</md-option>
-								<md-option value="lunch">Lunch</md-option>
-								<md-option value="kicker">Kicker</md-option>
-							</md-select>
-						</md-input-container>
-						<md-input-container class="md-block">
-							<label>Message</label>
-							<input placeholder="%u wants %c" type="text" ng-model="createGroup.message">
-						</md-input-container>
-					</div>
-					<div layout-align="center" layout="row">
-					  <md-button aria-label="Cancel" class="md-primary" type="reset" ng-click="hideDialog()" >Cancel</md-button>
-					  <md-button aria-label="Create" class="md-primary" type="submit">Create</md-button>
-					</div>
-				</form>
-			  </md-dialog>
-			</div>
-			
 			<div class="md-dialog-container" id="dialogJoin">
 			  <md-dialog layout-padding="">
 				<h2>Join Group</h2>

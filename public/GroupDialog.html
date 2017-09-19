@@ -1,0 +1,31 @@
+<md-dialog layout-padding="">
+    <form name="group" ng-submit="submit()">
+        <h2>{{title}}</h2>
+        <div class="flex flex-col">
+            <md-input-container class="md-block">
+                <label>Name</label>
+                <input type="text" required ng-model="name">
+            </md-input-container>
+            <md-input-container class="md-block">
+                <label>Password</label>
+                <input type="password" ng-model="password">
+            </md-input-container>
+            <md-input-container class="md-block">
+                <label>Type</label>
+                <md-select ng-model="type">
+                    <md-option value="coffee">Coffee</md-option>
+                    <md-option value="lunch">Lunch</md-option>
+                    <md-option value="kicker">Kicker</md-option>
+                </md-select>
+            </md-input-container>
+            <md-input-container class="md-block">
+                <label>Message</label>
+                <input placeholder="%u wants %c" type="text" ng-model="message">
+            </md-input-container>
+        </div>
+        <div layout-align="center" layout="row">
+            <md-button aria-label="Cancel" class="md-primary" type="reset" ng-click="hideDialog()">Cancel</md-button>
+            <md-button aria-label="Create" class="md-primary" type="submit">{{action}}</md-button>
+        </div>
+    </form>
+</md-dialog>
