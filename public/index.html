@@ -344,7 +344,7 @@
 				<md-toolbar ng-click="showSetName($event)" class="md-theme-indigo" style="cursor: pointer;">
 					<div class="md-toolbar-tools">
 						<h2 flex md-truncate style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Hello {{name}}</h2>
-						<md-button class="md-icon-button" aria-label="Change Name">
+						<md-button class="md-icon-button" aria-label="Change your Name" title="Change your Name">
 							<md-icon md-svg-icon="editor:ic_mode_edit_24px"></md-icon>
 						</md-button>
 					</div>
@@ -356,7 +356,7 @@
 							ng-click="activateGroup(group.id)" ng-repeat="group in groups" role="link">
 							<p>{{group.name}}</p>
 							  <md-button ng-click="leaveGroup(group.id)" class="md-icon-button md-secondary">
-								<md-icon md-svg-icon="navigation:ic_cancel_24px""></md-icon>
+								<md-icon md-svg-icon="navigation:ic_cancel_24px" title="Leave Group" aria-label="Leave Group"></md-icon>
 							  </md-button>
 						  </md-list-item>
 						  
@@ -384,7 +384,7 @@
 							<md-icon md-svg-icon="navigation:ic_menu_24px" aria-label="Menu"></md-icon>
 						</md-button>
 						<h2 flex md-truncate style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{activeGroup.name}}</h2>
-						<md-button class="md-icon-button" ng-click="showEditDialog($event)" aria-label="Edit Group">
+						<md-button class="md-icon-button" ng-click="showEditDialog($event)" aria-label="Edit Group" title="Edit Group">
 							<md-icon md-svg-icon="editor:ic_mode_edit_24px"></md-icon>
 						</md-button>
 					</div>
