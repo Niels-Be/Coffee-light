@@ -1,0 +1,31 @@
+<md-dialog layout-padding="">
+  
+  <h2>Join Group</h2>
+  
+  <!-- Theming should be fixed in angular material 1.2.0 (Due by September 22, 2017) -->
+  <md-autocomplete class="md-accent" md-no-cache="true"
+    md-selected-item="joinGroupSelected"
+    md-search-text="searchText"
+    md-items="item in searchGroups(searchText)"
+    md-item-text="item.name"
+    md-min-length="0"
+    placeholder="Name">
+    <md-item-template>
+      <span md-highlight-text="searchText" md-highlight-flags="^i">{{item.name}}</span>
+    </md-item-template>
+    <md-not-found>
+      No groups matching "{{searchText}}" were found.
+    </md-not-found>
+  </md-autocomplete>
+  
+  <md-input-container class="md-block">
+    <label>Password</label>
+    <input ng-disabled="!joinGroupSelected.hasPassword" autocomplete="new-password" type="password" ng-model="joinGroupPassword">
+  </md-input-container>
+  
+  <div layout-align="center" layout="row">
+    <md-button aria-label="Cancel" class="md-primary" ng-click="hideDialog()">Cancel</md-button>
+    <md-button aria-label="Join"   class="md-primary" ng-click="joinGroup(joinGroupSelected, joinGroupPassword)">Join</md-button>
+  </div>
+
+</md-dialog>

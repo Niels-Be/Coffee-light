@@ -77,6 +77,7 @@
 	<script src="./styles/lunch.js"></script>
 
 	<script src="./GroupDialog.js"></script>
+  <script src="./JoinDialog.js"></script>
 
     <!-- Your application bootstrap  -->
     <script type="text/javascript">
@@ -153,21 +154,6 @@
 				window.onhashchange();
 				
 				$scope.name = coffeeLight.loadName();
-				
-				$scope.joinGroup = (group, password) => {
-					let promiseGroupId;
-					if(group == null){
-						promiseGroupId = getChannelByName($scope.searchText)
-							.then(res => res.channel.id);
-					}
-					else {
-						promiseGroupId = Promise.resolve(group.id);
-					}
-					promiseGroupId.then(groupId => subscribeToChannel(groupId, password))
-						.then($scope.hideDialog.bind($scope))
-						.then($scope.updateGroupsBinding.bind($scope))
-						.catch($scope.handleFetchError.bind($scope));
-				};
 				
 				$scope.handleFetchError = (res) => {
 					if(res.status === 400) {
@@ -292,19 +278,7 @@
 					return searchChannels(query).then(r => r.channels).catch($scope.handleFetchError.bind($scope));
 				};
 				
-				function showDialogFactory(id) {
-					return ev => {
-						console.log("opening dialog " + id);
-						$mdDialog.show({
-							clickOutsideToClose: true,
-							contentElement     : "#" + id,
-							parent             : angular.element(document.body),
-							targetEvent        : ev
-						});
-					};
-				}
-				
-				$scope.showJoinGroup = showDialogFactory("dialogJoin");
+				$scope.showJoinGroup   = JoinDialogFactory.bind(JoinDialogFactory, $scope, $mdDialog, document.getElementById("main"));
 				$scope.showCreateGroup = GroupDialogFactory.bind(GroupDialogFactory, $scope, $mdDialog, "create", document.getElementById("main"));
 				$scope.showEditDialog  = GroupDialogFactory.bind(GroupDialogFactory, $scope, $mdDialog, "edit"  , document.getElementById("main"));
 				
@@ -424,34 +398,6 @@
 			</md-content>
 				
         </section>
-			<div class="md-dialog-container" id="dialogJoin">
-			  <md-dialog layout-padding="">
-				<h2>Join Group</h2>
-				<!-- Theming should be fixed in angular material 1.2.0 (Due by September 22, 2017) -->
-				<md-autocomplete class="md-accent" md-no-cache="true"
-					md-selected-item="joinGroupSelected"
-					md-search-text="searchText"
-					md-items="item in searchGroups(searchText)"
-					md-item-text="item.name"
-					md-min-length="0"
-					placeholder="Name">
-					<md-item-template>
-					  <span md-highlight-text="searchText" md-highlight-flags="^i">{{item.name}}</span>
-					</md-item-template>
-					<md-not-found>
-					  No groups matching "{{searchText}}" were found.
-					</md-not-found>
-				</md-autocomplete>
-				<md-input-container class="md-block">
-						<label>Password</label>
-						<input ng-disabled="!joinGroupSelected.hasPassword" autocomplete="new-password" type="password" ng-model="joinGroupPassword">
-				</md-input-container>
-				<div layout-align="center" layout="row">
-				  <md-button aria-label="Cancel" class="md-primary" ng-click="hideDialog()">Cancel</md-button>
-				  <md-button aria-label="Join"   class="md-primary" ng-click="joinGroup(joinGroupSelected, joinGroupPassword)">Join</md-button>
-				</div>
-			  </md-dialog>
-			</div>
 		</div>
 
     </div>
