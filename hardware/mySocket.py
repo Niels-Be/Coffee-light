@@ -71,7 +71,7 @@ i=0
 def on_message(ws, message):
   global myCoffeeThread, myKickerThread, myLunchThread, n, i
   myjson = json.loads(message)
-  if("Coffee" in myjson["notification"]["title"]):
+  if("Coffee" in myjson["data"]["notification_title"]):
     if(myCoffeeThread is not None and myCoffeeThread.isAlive()):
       n=n+1
       i=0
@@ -79,7 +79,7 @@ def on_message(ws, message):
       n=1
       myCoffeeThread = threading.Thread(target=showCoffee, name="blink")
       myCoffeeThread.start()
-  elif("Kicker" in myjson["notification"]["title"]):
+  elif("Kicker" in myjson["data"]["notification_title"]):
     if(myKickerThread is not None and myKickerThread.isAlive()):       
       n=n+1
       i=0
@@ -87,7 +87,7 @@ def on_message(ws, message):
       n=1
       myKickerThread = threading.Thread(target=showIcon("Kicker"), name="show")
       myKickerThread.start()
-  elif("Lunch" in myjson["notification"]["title"]):
+  elif("Lunch" in myjson["data"]["notification_title"]):
     if(myLunchThread is not None and myLunchThread.isAlive()):
       n=n+1
       i=0
