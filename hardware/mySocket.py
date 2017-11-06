@@ -121,7 +121,7 @@ def subscribe(ws, channel, password):
 
 if __name__ == "__main__":
   websocket.enableTrace(True)
-  ws = websocket.WebSocketApp("ws://coffee.waeco-soft.com/websocket",
+  ws = websocket.WebSocketApp("wss://coffee.waeco-soft.com/websocket",
                               on_message = on_message,
                               on_error = on_error,
                               on_close = on_close)
