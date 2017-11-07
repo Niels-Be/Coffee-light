@@ -1,0 +1,13 @@
+[Unit]
+Description=Websocket listener for coffee.waeco-soft.com
+After=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python /opt/coffee-light/mySocket.py
+WorkingDirectory=/opt/coffee-light
+Restart=always
+User=root
+
+[Install]
+WantedBy=multi-user.target
