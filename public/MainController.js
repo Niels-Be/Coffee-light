@@ -1,8 +1,14 @@
 var coffeeLight = coffeeLight || {};
 coffeeLight.size = 0.7;
 
+coffeeLight.coffeeNames = ["Abbayesii","Affinis","Alleizettii","Ambanjensis","Ambongensis","Andrambovatensis","Ankaranensis","Anthonyi","Arabica","Arenesiana","Augagneurii","Bakossii","Benghalensis","Bertrandii","Betamponensis","Bissetiae","Boinensis","Boiviniana","Bonnieri","Brassii","Brevipes","Bridsoniae","Buxifolia","Canephora","Carrissoi","Charrieriana","Cochinchinensis","Commersoniana","Congensis","Costatifructa","Coursiana","Dactylifera","Decaryana","Dubardii","Ebracteolata","Eugenioides","Fadenii","Farafanganensis","Floresiana","Fotsoana","Fragilis","Fragrans","Gallienii","Grevei","Heimii","Homollei","Horsfieldiana","Humbertii","Humblotiana","Humilis","Jumellei","Kapakata","Kianjavatensis","Kihansiensis","Kimbozensis","Kivuensis","Labatii","Lancifolia","Lebruniana","Leonimontana","Leroyi","Liaudii","Liberica","Ligustroides","Littoralis","Lulandoensis","Mabesae","Macrocarpa","Madurensis","Magnistipula","Malabarica","Mangoroensis","Mannii","Manombensis","Mapiana","Mauritiana","Mayombensis","Mcphersonii","Melanocarpa","Merguensis","Millotii","Minutiflora","Mogenetii","Mongensis","Montekupensis","Montis-sacri","Moratii","Mufindiensis","Myrtifolia","Namorokensis","Neobridsoniae","Neoleroyi","Perrieri","Pervilleana","Pocsii","Pseudozanguebariae","Pterocarpa","Racemosa","Rakotonasoloi","Ratsimamangae","Resinosa","Rhamnifolia","Richardii","Sahafaryensis","Sakarahae","Salvatrix","Sambavensis","Sapinii","Schliebenii","Semsei","Sessiliflora","Stenophylla","Tetragona","Togoensis","Toshii","Travancorensis","Tricalysioides","Tsirananae","Vatovavyensis","Vavateninensis","Vianneyi","Vohemarensis","Wightiana","Zanguebariae"];
+
 coffeeLight.loadName = () => {
-  name = localStorage.getItem("coffeeLight.name") || "Coffee Lover";
+  name = localStorage.getItem("coffeeLight.name");
+  if(name === null || name === "null") {
+    name = "Coffea " + coffeeLight.coffeeNames[Math.floor(Math.random()*coffeeLight.coffeeNames.length)];
+    coffeeLight.changeName(name);
+  }
   return name;
 };
 

@@ -197,29 +197,31 @@ auth.onAuthStateChanged(function (user) {
 
 
 function changeName(name) {
-    let authUpdate = auth.currentUser.updateProfile({
-        displayName: name
+  let authUpdate = signIn.promise.then(() => {
+    auth.currentUser.updateProfile({
+      displayName: name
     });
-
-    let serverUpdate = signedInFetch("./api/v1/register", {
-        credentials: 'same-origin',
-        method: 'POST',
-        headers: new Headers({
-            "content-type": "application/json",
-            "cache-control": "no-cache"
-        }),
-        body: JSON.stringify({
-            name: name
-        })
-    });
-
+    
     sendToWorker({
         type: "setUser",
         userId: auth.currentUser.uid,
         userName: name
     });
+  });
 
-    return Promise.all([authUpdate, serverUpdate]);
+  let serverUpdate = signedInFetch("./api/v1/register", {
+      credentials: 'same-origin',
+      method: 'POST',
+      headers: new Headers({
+          "content-type": "application/json",
+          "cache-control": "no-cache"
+      }),
+      body: JSON.stringify({
+          name: name
+      })
+  });
+
+  return Promise.all([authUpdate, serverUpdate]);
 }
 
 
