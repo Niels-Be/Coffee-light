@@ -17,8 +17,10 @@ class JoinDialog {
   }  
 }
 
-function JoinDialogFactory($scope, $mdDialog, parent, ev) {
+function JoinDialogFactory($scope, $mdDialog, parent, ev, channelId) {
   parent = parent instanceof Element ? angular.element(parent) : parent;
+  let scope = $scope.$new();
+  scope.searchText = channelId;
   $mdDialog.show({
     controller: JoinDialog,
     templateUrl: 'JoinDialog.html',
@@ -26,6 +28,6 @@ function JoinDialogFactory($scope, $mdDialog, parent, ev) {
     targetEvent: ev,
     clickOutsideToClose: true,
     preserveScope: true,
-    scope: $scope.$new()
+    scope: scope
   });
 }

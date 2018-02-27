@@ -165,7 +165,21 @@ angular
   }
 
   $scope.$watch("activeGroupId", (id) => {
-    if(id && (!$scope.activeGroup || id != $scope.activeGroup.id) ) {
+    if(id === undefined || id === null) {
+      return;
+    }
+    getSubscriptions().then(result => {
+      if(result.subscriptions.indexOf(id) < 0) {
+        getChannel(id).then(result => {
+          if($scope.activeGroup.id !==  result.channel.id) {
+            return; // activeGroup changed while loading data
+          }
+          $scope.showJoinGroup(undefined, result.channel.name);
+        });
+      }
+    });
+    
+    if(!$scope.activeGroup || id != $scope.activeGroup.id) {
       loadGroupData(id);
     }
   });
