@@ -18,9 +18,9 @@
     </md-not-found>
   </md-autocomplete>
   
-  <md-input-container class="md-block">
+  <md-input-container ng-show="joinGroupSelected.hasPassword" class="md-block">
     <label>Password</label>
-    <input ng-disabled="!joinGroupSelected.hasPassword" autocomplete="new-password" type="password" ng-model="joinGroupPassword">
+    <input autocomplete="new-password" type="password" ng-model="joinGroupPassword">
   </md-input-container>
   
   <div layout-align="center" layout="row">
