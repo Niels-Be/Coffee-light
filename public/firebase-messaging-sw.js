@@ -96,7 +96,7 @@ function showNotification(data, silent, hideButtons) {
       },
       {
         action: 'decline',
-        title: '⤻ nope'
+        title: '👎 nope'
       }
     ] : undefined
   });
