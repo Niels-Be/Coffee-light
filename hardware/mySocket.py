@@ -73,10 +73,30 @@ n=1
 myCoffeeThread = None
 myLunchThread = None
 myKickerThread = None
+currentMessageId = ""
 i=0
 def on_message(ws, message):
-  global myCoffeeThread, myKickerThread, myLunchThread, n, i
+  logging.debug(message)
   myjson = json.loads(message)
+  type = myjson["data"]["type"]
+  if(type == "notify"):
+    return on_notify(ws, myjson)
+  if(type == "replay"):
+    return on_replay(ws, myjson)
+
+  logging.error("Unsupported Message: " + str(myjson) )
+
+def on_replay(ws, myjson):
+  global n, i, currentMessageId
+  if(myjson["data"]["messageId"] == currentMessageId and myjson["data"]["action"] == "accept"):
+    n=n+1
+    i=0
+  else:
+    logging.debug("Ignored Replay: " + str(myjson) )
+
+def on_notify(ws, myjson):
+  global myCoffeeThread, myKickerThread, myLunchThread, n, i, currentMessageId
+  currentMessageId = myjson["data"]["messageId"]
   if("Coffee" in myjson["data"]["notification_title"]):
     if(myCoffeeThread is not None and myCoffeeThread.isAlive()):
       n=n+1
@@ -100,7 +120,6 @@ def on_message(ws, message):
     else:
       n=1
       myLunchThread = threading.Thread(target=showIcon("Lunch"), name="show")
-  logging.debug(message)
 
 def on_error(ws, error):
   print(error)
