@@ -5,7 +5,13 @@ import colorsys
 import math
 import time
 import signal
-import unicornhat as unicorn
+
+try:
+  import unicornhat as unicorn
+except ImportError:
+  print("Could not import unicornhat. Falling back to mock display.")
+  import unimog as unicorn
+
 import threading
 import websocket
 import json
