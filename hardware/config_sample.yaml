@@ -1,0 +1,8 @@
+---
+server: wss://coffee.waeco-soft.com/
+channels:
+- id: '1'
+- id: '6'
+  password: ''
+- id: f6380db0-c00d-4e0c-8de6-bda0d83ab212
+

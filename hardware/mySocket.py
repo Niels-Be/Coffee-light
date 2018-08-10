@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import config as conf
 import logging
 import colorsys
 import math
@@ -130,9 +131,9 @@ def on_close(ws):
   logging.debug("closed")
 
 def on_open(ws):
-  subscribe(ws, "1", "")
-  subscribe(ws, "6", "")
-  subscribe(ws, "f6380db0-c00d-4e0c-8de6-bda0d83ab212", "")
+  channels = conf.get_channels()
+  for i in range(0, len(channels)):
+    subscribe(ws, channels[i]["id"], channels[i]["password"])
 
 def subscribe(ws, channel, password):
   if(password == ""):
@@ -146,7 +147,7 @@ def subscribe(ws, channel, password):
 
 if __name__ == "__main__":
   websocket.enableTrace(True)
-  ws = websocket.WebSocketApp("wss://coffee.waeco-soft.com/websocket",
+  ws = websocket.WebSocketApp(conf.get_server() + "/websocket",
                               on_message = on_message,
                               on_error = on_error,
                               on_close = on_close)
