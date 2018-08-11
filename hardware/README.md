@@ -19,7 +19,7 @@ The file contains two properties:
 - server: the host, port and protocol (`ws` or `wss`) of the Coffee-light server.
 - channels: an array of channels. Each entry must contain a channel id. Optionally you can provide a channel password.
 
-Note: if there is no `config.yaml` a sample config is created and used. [See config_samle.yaml](hardware/config_sample.yaml)
+Note: if there is no `config.yaml` a sample config is created and used. [See config_samle.yaml](config_sample.yaml)
 
 
 # Run
