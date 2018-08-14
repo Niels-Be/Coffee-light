@@ -47,6 +47,7 @@ function handleIncommingNotification(data) {
   } 
   else if (data.type == "notify") {
     data.acceptedUsers = [];
+    data.declinedUsers = [];
     if (!notifications[data.messageId] && // avoid duplicates
       data.user_id !== userId && // hide own messages
       data.name !== userName && // hide messages with same name
@@ -65,7 +66,7 @@ function handleIncommingNotification(data) {
 }
 
 function processReplay(data) {
-  if (data.action !== "accept") return;
+  if (data.action !== "accept" && data.action !== "decline") return;
   return self.registration.getNotifications({
     tag: data.messageId
   }).then((notifies) => {
@@ -76,15 +77,25 @@ function processReplay(data) {
       console.log("Notification already closed. Hide replay");
       return;
     }
-    orgData.acceptedUsers.push(data.name);
+    if(data.action === "accept") {
+      orgData.acceptedUsers.push(data.name);
+    }
+    else if(data.action === "decline") {
+      orgData.declinedUsers.push(data.name);
+    }
     return showNotification(orgData, true, !notify);
   });
 }
 
 function showNotification(data, silent, hideButtons) {
   setTimeout(cleanupOldMessages, data.notification_ttl * 1000 + 1);
+
+  let body = data.notification_body;
+  body += data.acceptedUsers.length > 0 ? "\nAccepted: " + data.acceptedUsers.join(", ") : "";
+  body += data.declinedUsers.length > 0 ? "\nDeclined: " + data.declinedUsers.join(", ") : "";
+
   return self.registration.showNotification(data.notification_title, {
-    body: data.notification_body + (data.acceptedUsers.length > 0 ? "\nAccepted: " + data.acceptedUsers.join(", ") : ""),
+    body: body,
     icon: data.notification_icon,
     tag: data.messageId,
     data: data,
