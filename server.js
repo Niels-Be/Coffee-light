@@ -5,6 +5,14 @@ const http = require('http');
 const fs = require('fs');
 const WebSocket = require('ws');
 
+const args = process.argv.slice(2);
+let publicFolder = "public";
+if( args.length > 0 ) {
+    if( args.length > 1 ) {
+        console.error("Zero or one argument expected");
+        process.exit(1);
+    }
+}
 
 const CoffeLight = require('./app/app');
 
@@ -50,7 +58,7 @@ app.get('/firebase.js', (req, res) => {
     res.type('text/javascript').send("const firebaseConfig = " + JSON.stringify(coffeLight.config.firebase.web) + ";");
 });
 
-app.use(express.static(__dirname + '/public'));
+app.use(express.static(__dirname + '/' + publicFolder));
 
 
 // start app at localhost:8080

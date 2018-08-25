@@ -3,7 +3,9 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "node server"
+    "prestart": "node build",
+    "start": "node server public_build",
+    "start-dev": "node server public"
   },
   "dependencies": {
     "body-parser": "^1.18.1",
@@ -12,5 +14,9 @@
     "firebase-admin": "^5.2.1",
     "uuid": "^3.1.0",
     "ws": "^3.2.0"
+  },
+  "devDependencies": {
+    "glob": "^7.1.2",
+    "uglify-es": "^3.3.9"
   }
 }
