@@ -3,7 +3,7 @@ const EventEmitter = require("events");
 const PacketEmitter = new EventEmitter();
 
 let subscribtions = {};
-
+let connections = [];
 
 module.exports = function onWebSocketConnect(ws, req) {
 
@@ -42,11 +42,14 @@ module.exports = function onWebSocketConnect(ws, req) {
         Object.keys(subscribtions).forEach((key) => {
             subscribtions[key] = subscribtions[key].filter(w => w !== ws);
         });
+        connections = connections.filter(x => x !== ws);
     });
 
     ws.on('error', (err) => {
         console.error(err.stack);
     });
+
+    connections.push(ws);
 };
 
 PacketEmitter.on("subscribe", (data, ws) => {
@@ -95,6 +98,8 @@ coffeLight.on("sendToChannel", (channel, payload, options) => {
     });
 });
 
-coffeLight.on("close", () => {
-    //TODO close all websockets
-});
+function shutdownHandler() {
+    connections.forEach(ws => ws.close());
+}
+process.on('SIGTERM', shutdownHandler);
+process.on('SIGINT', shutdownHandler);
