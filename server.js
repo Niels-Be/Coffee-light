@@ -12,7 +12,9 @@ const CoffeLight = require('./app/app');
 
 let config = {};
 if (fs.existsSync(__dirname + "/config.json")) {
-    config = require("./config.json");
+    config = require(__dirname + "/config.json");
+} else if(fs.existsSync("/etc/coffee/config.json")) {
+    config = require("/etc/coffee/config.json");
 } else {
     console.error("WARNING: Could not find config.json. Using default values");
 }
