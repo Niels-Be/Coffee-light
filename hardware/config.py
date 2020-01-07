@@ -38,8 +38,12 @@ def _verify_config(conf):
 
 _verify_config(_config)
 
+server = _config["server"]
+while server.endswith("/"):
+  server = server[:len(server)-1]
+
 def get_server():
-  return _config["server"]
+  return server
 
 def get_channels():
   return _config["channels"]
