@@ -98,7 +98,7 @@ def on_replay(ws, myjson):
 def on_notify(ws, myjson):
   global myCoffeeThread, myKickerThread, myLunchThread, n, i, currentMessageId
   currentMessageId = myjson["data"]["messageId"]
-  if("Coffee" in myjson["data"]["notification_title"]):
+  if("Coffee" in myjson["data"]["notification_title"] or "coffee.png" == myjson["data"]["notification_icon"]):
     if(myCoffeeThread is not None and myCoffeeThread.isAlive()):
       n=n+1
       i=0
