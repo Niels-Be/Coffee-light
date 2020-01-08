@@ -123,7 +123,7 @@ def on_notify(ws, myjson):
       myLunchThread = threading.Thread(target=showIcon("Lunch"), name="show")
 
 def on_error(ws, error):
-  print(error)
+  print("WebSocket error:", error)
   logging.error(error)
 
 def on_close(ws):
@@ -131,6 +131,7 @@ def on_close(ws):
   logging.debug("closed")
 
 def on_open(ws):
+  print("connected")
   channels = conf.get_channels()
   for i in range(0, len(channels)):
     subscribe(ws, channels[i]["id"], channels[i]["password"])
@@ -147,7 +148,9 @@ def subscribe(ws, channel, password):
 
 if __name__ == "__main__":
   websocket.enableTrace(True)
-  ws = websocket.WebSocketApp(conf.get_server() + "/websocket",
+  url = conf.get_server() + "/websocket"
+  print("connecting to url", url, "...")
+  ws = websocket.WebSocketApp(url,
                               on_message = on_message,
                               on_error = on_error,
                               on_close = on_close)
