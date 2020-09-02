@@ -39,6 +39,9 @@
     <!-- Angular Material Library -->
 	<script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.2.0/angular-material.js"></script>
 	
+	<!-- MD Icons -->
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+	
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/86/three.js"></script>
 	<script src="./styles/kicker.js"></script>
 	<script src="./styles/coffee.js"></script>
@@ -59,7 +62,7 @@
 					<div class="md-toolbar-tools">
 						<h2 flex md-truncate style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Hello {{name}}</h2>
 						<md-button class="md-icon-button" aria-label="Change your Name" title="Change your Name">
-							<md-icon md-svg-icon="editor:ic_mode_edit_24px"></md-icon>
+							<md-icon class="material-icons">edit</md-icon>
 						</md-button>
 					</div>
                 </md-toolbar>
@@ -70,7 +73,7 @@
 							ng-click="activateGroup(group.id)" ng-repeat="group in groups" role="link">
 							<p>{{group.name}}</p>
 							  <md-button ng-click="leaveGroup(group.id)" class="md-icon-button md-secondary">
-								<md-icon md-svg-icon="navigation:ic_cancel_24px" title="Leave Group" aria-label="Leave Group"></md-icon>
+								<md-icon class="material-icons" aria-label="leave group">cancel</md-icon>
 							  </md-button>
 						  </md-list-item>
 						  
@@ -79,11 +82,11 @@
 					  <md-list>
 						  <md-divider></md-divider>
 						  <md-list-item ng-click="showJoinGroup($event)" role="link">
-							<md-icon md-svg-icon="social:ic_group_add_24px"></md-icon>
+							<md-icon class="material-icons">group_add</md-icon>
 							<p class="md-body-2">Join a Group</p>
 						  </md-list-item>
 						  <md-list-item ng-click="showCreateGroup($event)" role="link">
-							<md-icon md-svg-icon="social:ic_group_add_24px"></md-icon>
+							<md-icon class="material-icons">fiber_new</md-icon>
 							<p class="md-body-2">Create a Group</p>
 						  </md-list-item>
 					  </md-list>
@@ -95,11 +98,11 @@
 				<md-toolbar class="animate-show md-whiteframe-z1">
 					<div class="md-toolbar-tools">
 						<md-button class="md-icon-button" ng-click="toggleLeft()" hide-gt-md aria-label="Menu">
-							<md-icon md-svg-icon="navigation:ic_menu_24px" aria-label="Menu"></md-icon>
+							<md-icon class="material-icons">menu</md-icon>
 						</md-button>
 						<h2 flex md-truncate style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{activeGroup.name}}</h2>
 						<md-button class="md-icon-button" ng-click="showEditDialog($event)" aria-label="Edit Group" title="Edit Group">
-							<md-icon md-svg-icon="editor:ic_mode_edit_24px"></md-icon>
+							<md-icon class="material-icons">edit</md-icon>
 						</md-button>
 					</div>
 				</md-toolbar>
