@@ -7,7 +7,7 @@ except(FileNotFoundError):
   shutil.copy2('config_sample.yaml', 'config.yaml')
   _file_stream = io.open('config.yaml', 'r')
 
-_config = yaml.load(_file_stream)
+_config = yaml.safe_load(_file_stream)
 _file_stream.close()
 
 class InvalidConfigException(Exception):
